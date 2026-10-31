@@ -7,6 +7,7 @@
   --ep-field-view-word-break: break-all;
   --ep-field-view-content-width: 100%;
   --ep-field-view-min-height: var(--el-component-size);
+  --ep-field-view-tag-gap: 6px;
 }
 
 .ep-field-view .el-form-item__content {
@@ -23,6 +24,18 @@
 .ep-field-view--size-small {
   --ep-field-view-font-size: var(--el-font-size-extra-small);
   --ep-field-view-min-height: var(--el-component-size-small);
+  --ep-field-view-tag-gap: 4px;
+}
+
+/* 中文：`inputTagMode: 'tag'` 的标签容器，间距与换行对齐 `el-input-tag__inner`。
+   English: Tag container for `inputTagMode: 'tag'`; spacing and wrapping follow
+   `el-input-tag__inner`. */
+.ep-field-view__tags {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--ep-field-view-tag-gap);
+  align-items: center;
+  vertical-align: middle;
 }
 
 .ep-field-view__content {

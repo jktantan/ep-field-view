@@ -10,16 +10,17 @@
 
 所有变量都定义在 `.ep-field-view` 上，可在任意祖先容器中覆盖：
 
-| 变量                            | 默认值                             | 说明                           |
-| ------------------------------- | ---------------------------------- | ------------------------------ |
-| `--ep-field-view-color`         | `var(--el-text-color-regular)`     | 文本颜色                       |
-| `--ep-field-view-empty-color`   | `var(--el-text-color-placeholder)` | 空值文本颜色                   |
-| `--ep-field-view-font-size`     | `var(--el-font-size-base)`         | 字号                           |
-| `--ep-field-view-font-weight`   | `400`                              | 字重                           |
-| `--ep-field-view-line-height`   | `1.6`                              | 行高                           |
-| `--ep-field-view-word-break`    | `break-all`                        | 长文本断行策略                 |
-| `--ep-field-view-content-width` | `100%`                             | 内容宽度                       |
-| `--ep-field-view-min-height`    | `var(--el-component-size)`         | 文本行最小高度（随 size 变化） |
+| 变量                            | 默认值                             | 说明                            |
+| ------------------------------- | ---------------------------------- | ------------------------------- |
+| `--ep-field-view-color`         | `var(--el-text-color-regular)`     | 文本颜色                        |
+| `--ep-field-view-empty-color`   | `var(--el-text-color-placeholder)` | 空值文本颜色                    |
+| `--ep-field-view-font-size`     | `var(--el-font-size-base)`         | 字号                            |
+| `--ep-field-view-font-weight`   | `400`                              | 字重                            |
+| `--ep-field-view-line-height`   | `1.6`                              | 行高                            |
+| `--ep-field-view-word-break`    | `break-all`                        | 长文本断行策略                  |
+| `--ep-field-view-content-width` | `100%`                             | 内容宽度                        |
+| `--ep-field-view-min-height`    | `var(--el-component-size)`         | 文本行最小高度（随 size 变化）  |
+| `--ep-field-view-tag-gap`       | `6px`（small 为 `4px`）            | `inputTagMode="tag"` 的标签间距 |
 
 ```css
 /* 某个详情页容器内统一调整 */
