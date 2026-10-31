@@ -76,7 +76,9 @@ export default defineNuxtConfig({
 })
 ```
 
-模块会自动注册组件、引入样式并透传全局配置；`epFieldView` 在 Nuxt 配置中有完整类型提示。详见 [Nuxt 3 / 4 与 SSR](./guide/ssr.md)。
+模块会自动注册组件、引入样式并透传全局配置；`epFieldView` 在 Nuxt 配置中有完整类型提示。
+
+模块还会补上包内直接使用的 Element Plus 组件样式（`el-form-item`、`el-image`、`el-rate`、`el-tag`）：`@element-plus/nuxt` 的模板扫描只处理项目模板里的 `<el-*>`，看不到包内源码的静态 import。若宿主自行管理这些样式，可设置 `epFieldView.elementPlusStyles: false` 关闭。详见 [Nuxt 3 / 4 与 SSR](./guide/ssr.md)。
 
 ## 快速开始
 

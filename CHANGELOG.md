@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Nuxt module option `elementPlusStyles` (default `true`) to control the
+  Element Plus styles injected by the module.
+
+### Fixed
+
+- Nuxt module now injects the Element Plus styles for components imported
+  directly by the package (`el-form-item`, `el-image`, `el-rate`, `el-tag`).
+  `@element-plus/nuxt` only scans project templates for `resolveComponent()`
+  calls, so `.el-form-item` previously lost its `display: flex` layout and
+  labels stacked above their content.
+
 ## [0.3.0] - 2026-10-31
 
 ### Added

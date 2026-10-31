@@ -57,9 +57,20 @@ export default defineNuxtConfig({
 模块会自动完成：
 
 1. 全局注册 `<TextFormItem>` 与 `<JsonPreview>`；
-2. 把 `ep-field-view/style.css` 加入 Nuxt 的 `css`；
+2. 补上包内直接使用的 Element Plus 组件样式（`el-form-item`、`el-image`、`el-rate`、`el-tag`），再引入 `ep-field-view/style.css`；
 3. 将本包加入 `build.transpile`，避免 Nitro 外置造成重复的 Element Plus 注入 key；
 4. 把 `epFieldView` 配置传给 `app.use(EpFieldView, options)`。
+
+第 2 步是为了补上模板扫描的盲区：`@element-plus/nuxt` 只会为项目模板里的 `<el-*>` 注入样式，而本包在源码中直接 import 了 `ElFormItem` / `ElImage` / `ElRate` / `ElTag`。如果宿主自己管理这些样式，可以关闭自动注入：
+
+```ts
+export default defineNuxtConfig({
+  modules: ['@element-plus/nuxt', 'ep-field-view/nuxt'],
+  epFieldView: {
+    elementPlusStyles: false
+  }
+})
+```
 
 `epFieldView` 的类型为 `EpFieldViewOptions`，与 `app.use(EpFieldView, options)` 完全一致；Nuxt 配置中会获得类型提示：
 
@@ -75,7 +86,7 @@ export default defineNuxtConfig({
 })
 ```
 
-`@element-plus/nuxt` 负责 Element Plus 的组件与样式，本模块只负责 `ep-field-view`。
+`@element-plus/nuxt` 负责项目模板里出现的 Element Plus 组件与样式；本模块额外补上包内直接 import 的组件样式（`element-plus/es/components/form-item|image|rate|tag/style/css`），因为模板扫描看不到包内源码。若宿主自己控制这些样式，可设置 `epFieldView.elementPlusStyles: false`。
 
 ## Nuxt 3 页面
 
@@ -156,7 +167,14 @@ export default defineNuxtPlugin((nuxtApp) => {
 // nuxt.config.ts
 export default defineNuxtConfig({
   modules: ['@element-plus/nuxt'],
-  css: ['ep-field-view/style.css']
+  css: [
+    // 包内直接 import 的 Element Plus 组件样式，模板扫描不会自动引入
+    'element-plus/es/components/form-item/style/css',
+    'element-plus/es/components/image/style/css',
+    'element-plus/es/components/rate/style/css',
+    'element-plus/es/components/tag/style/css',
+    'ep-field-view/style.css'
+  ]
 })
 ```
 
