@@ -29,10 +29,24 @@ export function formatGeneric(value: unknown, context: FormatContext): string {
  *
  * English: Find the display label of an option by value.
  */
-export function findOptionLabel(options: FieldViewOption[], value: unknown): string | undefined {
-  const option = options.find((item) => isSameValue(item.value, value))
+export function findOptionLabel(options: FieldViewOption[], value: unknown, valueKey?: string): string | undefined {
+  const option = options.find((item) => isSameOptionValue(item.value, value, valueKey))
   if (!option) return undefined
   return option.label === null || option.label === undefined ? toText(option.value) : toText(option.label)
+}
+
+/**
+ * 中文：比较选项值与字段值。`value-key` 用于对象值（如 `{ id: 2 }`），
+ * 因为 model 中的对象与选项对象通常不是同一引用。
+ *
+ * English: Compare an option value with a field value. `value-key` handles
+ * object values (`{ id: 2 }`), whose model and option references usually differ.
+ */
+function isSameOptionValue(left: unknown, right: unknown, valueKey?: string): boolean {
+  if (isSameValue(left, right)) return true
+  if (!valueKey) return false
+  if (typeof left !== 'object' || left === null || typeof right !== 'object' || right === null) return false
+  return isSameValue((left as Record<string, unknown>)[valueKey], (right as Record<string, unknown>)[valueKey])
 }
 
 /**

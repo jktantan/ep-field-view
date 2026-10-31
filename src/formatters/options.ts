@@ -126,6 +126,15 @@ function normalizeOptionList(list: unknown[], optionProps: Required<FieldViewOpt
     }
     const record = item as Record<string, unknown>
     const value = record[optionProps.value] ?? record.value
+    // 中文：`el-select-v2` 的分组项只有 `label` + `options`，没有自身 value，
+    // 需要展开为普通选项，否则分组内的 label 无法解析。
+    // English: `el-select-v2` group entries only carry `label` + `options` and
+    // no value of their own. Flatten them, otherwise inner labels never resolve.
+    const grouped = record[optionProps.children] ?? record.options
+    if (value === undefined && Array.isArray(grouped)) {
+      result.push(...normalizeOptionList(grouped, optionProps))
+      continue
+    }
     const rawLabel = record[optionProps.label] ?? record.label ?? record.name ?? value
     result.push({
       ...record,
