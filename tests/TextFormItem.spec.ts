@@ -3,13 +3,18 @@ import { mount } from '@vue/test-utils'
 import { defineComponent, h, nextTick, reactive, ref, unref } from 'vue'
 import type { Plugin, Ref, VNodeChild } from 'vue'
 import {
+  ElAutocomplete,
   ElCascader,
   ElCheckbox,
   ElCheckboxGroup,
+  ElColorPickerPanel,
   ElDatePicker,
+  ElDatePickerPanel,
   ElForm,
   ElInput,
   ElInputNumber,
+  ElInputTag,
+  ElMention,
   ElOption,
   ElRadio,
   ElRadioGroup,
@@ -18,7 +23,8 @@ import {
   ElSlider,
   ElSwitch,
   ElTimePicker,
-  ElTransfer
+  ElTransfer,
+  ElTreeSelect
 } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import TextFormItem from '../src/components/TextFormItem.vue'
@@ -340,6 +346,167 @@ describe('value formatters', () => {
     })
     await nextTick()
     expect(content(time.wrapper)).toBe('09:15:00')
+  })
+
+  it('formats quarter, multi-select and new range date types', async () => {
+    const quarter = mountItem({
+      model: { value: new Date(2024, 4, 20) },
+      itemProps: { prop: 'value' },
+      slot: (model) => h(ElDatePicker, { modelValue: model.value, type: 'quarter' })
+    })
+    await nextTick()
+    expect(content(quarter.wrapper)).toBe('2024-Q2')
+
+    const quarters = mountItem({
+      model: { value: [new Date(2024, 4, 20), new Date(2024, 7, 1)] },
+      itemProps: { prop: 'value' },
+      slot: (model) => h(ElDatePicker, { modelValue: model.value, type: 'quarters' })
+    })
+    await nextTick()
+    expect(content(quarters.wrapper)).toBe('2024-Q2;2024-Q3')
+
+    const quarterRange = mountItem({
+      model: { value: [new Date(2024, 0, 1), new Date(2024, 6, 1)] },
+      itemProps: { prop: 'value' },
+      slot: (model) => h(ElDatePicker, { modelValue: model.value, type: 'quarterrange' })
+    })
+    await nextTick()
+    expect(content(quarterRange.wrapper)).toBe('2024-Q1~2024-Q3')
+
+    const yearRange = mountItem({
+      model: { value: [new Date(2023, 0, 1), new Date(2025, 0, 1)] },
+      itemProps: { prop: 'value' },
+      slot: (model) => h(ElDatePicker, { modelValue: model.value, type: 'yearrange' })
+    })
+    await nextTick()
+    expect(content(yearRange.wrapper)).toBe('2023~2025')
+
+    const years = mountItem({
+      model: { value: [new Date(2023, 0, 1), new Date(2025, 0, 1)] },
+      itemProps: { prop: 'value' },
+      slot: (model) => h(ElDatePicker, { modelValue: model.value, type: 'years' })
+    })
+    await nextTick()
+    expect(content(years.wrapper)).toBe('2023;2025')
+
+    const months = mountItem({
+      model: { value: [new Date(2024, 0, 1), new Date(2024, 4, 1)] },
+      itemProps: { prop: 'value' },
+      slot: (model) => h(ElDatePicker, { modelValue: model.value, type: 'months' })
+    })
+    await nextTick()
+    expect(content(months.wrapper)).toBe('2024-01;2024-05')
+  })
+
+  it('formats date and color panel components', async () => {
+    const date = mountItem({
+      model: { value: new Date(2024, 4, 20) },
+      itemProps: { prop: 'value' },
+      slot: (model) => h(ElDatePickerPanel, { modelValue: model.value, type: 'quarter' })
+    })
+    await nextTick()
+    expect(content(date.wrapper)).toBe('2024-Q2')
+
+    const color = mountItem({
+      model: { value: '#ff0000' },
+      itemProps: { prop: 'value' },
+      slot: (model) => h(ElColorPickerPanel, { modelValue: model.value })
+    })
+    await nextTick()
+    expect(content(color.wrapper)).toBe('#ff0000')
+  })
+
+  it('resolves tree select labels from tree data', async () => {
+    const single = mountItem({
+      model: { node: 'leaf-1' },
+      itemProps: { prop: 'node' },
+      slot: (model) =>
+        h(ElTreeSelect, {
+          modelValue: model.node,
+          data: [
+            {
+              value: 'parent',
+              label: '父节点',
+              children: [{ value: 'leaf-1', label: '子节点 1' }]
+            }
+          ]
+        })
+    })
+    await nextTick()
+    expect(content(single.wrapper)).toBe('子节点 1')
+
+    const multiple = mountItem({
+      model: { nodes: [1, 3] },
+      itemProps: { prop: 'nodes' },
+      slot: (model) =>
+        h(ElTreeSelect as any, {
+          modelValue: model.nodes,
+          multiple: true,
+          data: [
+            {
+              id: 1,
+              name: '分组',
+              nodes: [
+                { id: 2, name: '成员 2' },
+                { id: 3, name: '成员 3' }
+              ]
+            }
+          ] as any,
+          props: { label: 'name', value: 'id', children: 'nodes' }
+        })
+    })
+    await nextTick()
+    expect(content(multiple.wrapper)).toBe('分组;成员 3')
+  })
+
+  it('formats input tag, mention and autocomplete values', async () => {
+    const tags = mountItem({
+      model: { tags: ['vue', 'vite'] },
+      itemProps: { prop: 'tags' },
+      slot: (model) => h(ElInputTag, { modelValue: model.tags })
+    })
+    await nextTick()
+    expect(content(tags.wrapper)).toBe('vue;vite')
+
+    const mention = mountItem({
+      model: { content: '@ada 请看一下' },
+      itemProps: { prop: 'content' },
+      slot: (model) => h(ElMention, { modelValue: model.content })
+    })
+    await nextTick()
+    expect(content(mention.wrapper)).toBe('@ada 请看一下')
+
+    const autocomplete = mountItem({
+      model: { keyword: 'element-plus' },
+      itemProps: { prop: 'keyword' },
+      slot: (model) => h(ElAutocomplete, { modelValue: model.keyword })
+    })
+    await nextTick()
+    expect(content(autocomplete.wrapper)).toBe('element-plus')
+  })
+
+  it('renders input tag values as readonly tags in tag mode', async () => {
+    const { wrapper } = mountItem({
+      model: { tags: ['vue', 'vite'] },
+      itemProps: { prop: 'tags', inputTagMode: 'tag' },
+      slot: (model) => h(ElInputTag, { modelValue: model.tags, tagType: 'success', tagEffect: 'dark' })
+    })
+    await nextTick()
+    const tags = wrapper.findAll('.ep-field-view__content .el-tag')
+    expect(tags).toHaveLength(2)
+    expect(tags[0].text()).toBe('vue')
+    expect(tags[1].text()).toBe('vite')
+    expect(tags[0].classes()).toContain('el-tag--success')
+    expect(tags[0].classes()).toContain('el-tag--dark')
+
+    const global = mountItem({
+      model: { tags: ['vue'] },
+      itemProps: { prop: 'tags' },
+      slot: (model) => h(ElInputTag, { modelValue: model.tags }),
+      plugins: [[EpFieldView, { inputTagMode: 'tag' }]]
+    })
+    await nextTick()
+    expect(global.wrapper.findAll('.ep-field-view__content .el-tag')).toHaveLength(1)
   })
 
   it('joins slider ranges with rangeSeparator', async () => {

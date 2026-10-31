@@ -31,7 +31,8 @@ export const DEFAULT_CONFIG: EpFieldViewConfig = {
   nowrapInTable: true,
   optionProps: { ...DEFAULT_OPTION_PROPS },
   includeAffixes: true,
-  rateMode: 'text'
+  rateMode: 'text',
+  inputTagMode: 'text'
 }
 
 /**
@@ -39,7 +40,7 @@ export const DEFAULT_CONFIG: EpFieldViewConfig = {
  *
  * English: Date picker types that render a range.
  */
-export const RANGE_DATE_TYPES = new Set(['daterange', 'datetimerange', 'monthrange'])
+export const RANGE_DATE_TYPES = new Set(['daterange', 'datetimerange', 'monthrange', 'yearrange', 'quarterrange'])
 
 /**
  * 中文：内置日期格式，与 Element Plus 保持一致。
@@ -51,9 +52,15 @@ export const DEFAULT_DATE_FORMATS: Record<string, string> = {
   dates: 'YYYY-MM-DD',
   week: 'gggg[w]ww',
   year: 'YYYY',
+  years: 'YYYY',
   month: 'YYYY-MM',
+  months: 'YYYY-MM',
+  quarter: 'YYYY-[Q]Q',
+  quarters: 'YYYY-[Q]Q',
   datetime: 'YYYY-MM-DD HH:mm:ss',
   monthrange: 'YYYY-MM',
+  yearrange: 'YYYY',
+  quarterrange: 'YYYY-[Q]Q',
   daterange: 'YYYY-MM-DD',
   datetimerange: 'YYYY-MM-DD HH:mm:ss'
 }

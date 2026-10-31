@@ -30,22 +30,23 @@
 
 ## 组件解析表
 
-| 插槽组件                                               | 展示内容                      | 说明                                                                                                                                        |
-| ------------------------------------------------------ | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ElInput`、`ElInputTag`、`ElMention`、`ElAutocomplete` | 原值                          | `ElInput` 会拼接 `prefix` / `prepend` / `append` / `suffix` 插槽文本；数组按 `separator` 连接                                               |
-| `ElInputNumber`                                        | 原值                          | 优先使用组件自身的 `formatter`                                                                                                              |
-| `ElSelect`、`ElSelectV2`、`ElTreeSelect`               | 选项 label                    | 支持单选、多选、`options` prop、`data` 树、静态 `el-option`，`el-select` 的 `#label` 插槽会渲染为内容；`el-option` 的 `#label` 只影响下拉项 |
-| `ElRadioGroup`、`ElRadio`、`ElRadioButton`             | 选项文本 / label              | 支持 EP 2.6+ 的 `value` 与旧版 `label`                                                                                                      |
-| `ElCheckboxGroup`、`ElCheckbox`、`ElCheckboxButton`    | 选项文本 / label              | 多选按 `separator` 连接；支持 `true-label` / `false-label`                                                                                  |
-| `ElCascader`                                           | 完整路径                      | 路径分隔符取组件 `separator`（默认 `/`），多个值用 `separator`                                                                              |
-| `ElTransfer`                                           | `data` 中对应项的 label       | 支持 `props.key` / `props.label` 映射                                                                                                       |
-| `ElSwitch`                                             | `activeText` / `inactiveText` | 缺省回退到全局配置，默认“开 / 关”                                                                                                           |
-| `ElDatePicker`                                         | 日期文本                      | 支持 `date`、`datetime`、`week`、`month`、`year`、`dates`、`*range`                                                                         |
-| `ElTimePicker`                                         | 时间文本                      | 时间字符串原样展示；`Date` / 时间戳按 `timeFormat`                                                                                          |
-| `ElTimeSelect`                                         | 原值                          | 时间字符串原样展示                                                                                                                          |
-| `ElSlider`                                             | 数字 / 范围                   | 范围用 `rangeSeparator`（默认 `~`）                                                                                                         |
-| `ElRate`、`ElColorPicker`                              | 分数 / 评分样式               | `ElRate` 支持 `rateMode`：默认显示分数，`rate` 模式渲染禁用状态的 `el-rate`，保留自定义图标 / 图片                                          |
-| `ElSegmented`                                          | 选项 label                    | 读取 `options` prop                                                                                                                         |
+| 插槽组件                                            | 展示内容                      | 说明                                                                                                                                        |
+| --------------------------------------------------- | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ElInput`、`ElMention`、`ElAutocomplete`            | 原值                          | `ElInput` 会拼接 `prefix` / `prepend` / `append` / `suffix` 插槽文本；数组按 `separator` 连接                                               |
+| `ElInputTag`                                        | 原值 / 只读标签               | 数组按 `separator` 连接；`inputTagMode` 为 `tag` 时渲染只读 `el-tag`，保留 `tagType` / `tagEffect`                                          |
+| `ElInputNumber`                                     | 原值                          | 优先使用组件自身的 `formatter`                                                                                                              |
+| `ElSelect`、`ElSelectV2`、`ElTreeSelect`            | 选项 label                    | 支持单选、多选、`options` prop、`data` 树、静态 `el-option`，`el-select` 的 `#label` 插槽会渲染为内容；`el-option` 的 `#label` 只影响下拉项 |
+| `ElRadioGroup`、`ElRadio`、`ElRadioButton`          | 选项文本 / label              | 支持 EP 2.6+ 的 `value` 与旧版 `label`                                                                                                      |
+| `ElCheckboxGroup`、`ElCheckbox`、`ElCheckboxButton` | 选项文本 / label              | 多选按 `separator` 连接；支持 `true-label` / `false-label`                                                                                  |
+| `ElCascader`                                        | 完整路径                      | 路径分隔符取组件 `separator`（默认 `/`），多个值用 `separator`                                                                              |
+| `ElTransfer`                                        | `data` 中对应项的 label       | 支持 `props.key` / `props.label` 映射                                                                                                       |
+| `ElSwitch`                                          | `activeText` / `inactiveText` | 缺省回退到全局配置，默认“开 / 关”                                                                                                           |
+| `ElDatePicker`、`ElDatePickerPanel`                 | 日期文本                      | 支持 `date`、`datetime`、`week`、`month`、`year`、`quarter`、`dates`、多选与 `*range`                                                       |
+| `ElTimePicker`                                      | 时间文本                      | 时间字符串原样展示；`Date` / 时间戳按 `timeFormat`                                                                                          |
+| `ElTimeSelect`                                      | 原值                          | 时间字符串原样展示                                                                                                                          |
+| `ElSlider`                                          | 数字 / 范围                   | 范围用 `rangeSeparator`（默认 `~`）                                                                                                         |
+| `ElRate`、`ElColorPicker`、`ElColorPickerPanel`     | 分数 / 评分样式               | `ElRate` 支持 `rateMode`：默认显示分数，`rate` 模式渲染禁用状态的 `el-rate`，保留自定义图标 / 图片                                          |
+| `ElSegmented`                                       | 选项 label                    | 读取 `options` prop                                                                                                                         |
 
 未识别的组件或自定义组件会走通用格式化：
 
@@ -82,20 +83,21 @@
 </TextFormItem>
 ```
 
-对 `ElDatePicker`：
+对 `ElDatePicker` / `ElDatePickerPanel`：
 
 1. 组件 `dateFormat` prop；
 2. 全局配置 `dateFormat`；
 3. 插槽组件的 `format` prop；
 4. 内置映射（与 Element Plus 一致）：
 
-| type                           | 默认格式              |
-| ------------------------------ | --------------------- |
-| `date` / `dates` / `daterange` | `YYYY-MM-DD`          |
-| `datetime` / `datetimerange`   | `YYYY-MM-DD HH:mm:ss` |
-| `week`                         | `gggg[w]ww`           |
-| `month` / `monthrange`         | `YYYY-MM`             |
-| `year`                         | `YYYY`                |
+| type                                    | 默认格式              |
+| --------------------------------------- | --------------------- |
+| `date` / `dates` / `daterange`          | `YYYY-MM-DD`          |
+| `datetime` / `datetimerange`            | `YYYY-MM-DD HH:mm:ss` |
+| `week`                                  | `gggg[w]ww`           |
+| `month` / `months` / `monthrange`       | `YYYY-MM`             |
+| `year` / `years` / `yearrange`          | `YYYY`                |
+| `quarter` / `quarters` / `quarterrange` | `YYYY-[Q]Q`           |
 
 `value-format` 为 `x`（毫秒）或 `X`（秒）时会先转换时间戳，再格式化。字符串日期若无法被 dayjs 解析，会原样展示。
 
@@ -104,6 +106,18 @@
 ::: tip
 全局 `dateFormat` / `timeFormat` 默认为空字符串。保持为空才能让组件自身的 `format` 生效；一旦在全局配置中设置，会覆盖所有同类组件的 `format`。
 :::
+
+## 标签显示
+
+`ElInputTag` 默认按 `separator` 拼接为纯文本。设置 `input-tag-mode="tag"` 或全局 `inputTagMode: 'tag'` 后，文本模式会为每个值渲染只读的 `el-tag`，并保留组件自身的 `tagType` / `tagEffect`：
+
+```vue
+<TextFormItem label="标签" prop="tags" input-tag-mode="tag">
+  <el-input-tag v-model="model.tags" tag-type="success" tag-effect="dark" />
+</TextFormItem>
+```
+
+`text` 模式（默认）不渲染标签，继续使用 `separator` 拼接，便于表格、详情页保持纯文本排版。
 
 ## 多值与范围
 
@@ -115,7 +129,7 @@ createApp(App).use(EpFieldView, {
 ```
 
 - `ElSelect multiple`、`ElCheckboxGroup`、`ElCascader multiple`、`ElTransfer` 等使用 `separator`；
-- `daterange`、`datetimerange`、`monthrange`、`ElTimePicker is-range`、`ElSlider range` 使用 `rangeSeparator`。
+- `daterange`、`datetimerange`、`monthrange`、`yearrange`、`quarterrange`、`ElTimePicker is-range`、`ElSlider range` 使用 `rangeSeparator`。
 
 ## 显式 options 与字段映射
 

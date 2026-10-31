@@ -22,6 +22,7 @@ export type {
   FieldViewFormatterContext,
   FieldViewOption,
   FieldViewOptionProps,
+  InputTagMode,
   RateMode,
   TextFormItemProps
 } from './types'

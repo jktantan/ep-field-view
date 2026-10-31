@@ -1,6 +1,6 @@
-import dayjs from 'dayjs'
 import { DEFAULT_DATE_FORMAT } from '../constants'
 import type { FieldViewOption } from '../types'
+import dayjs from '../utils/date'
 import { getObjectLabel, isSameValue, toText } from '../utils/value'
 import type { FormatContext } from './types'
 

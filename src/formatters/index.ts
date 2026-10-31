@@ -5,6 +5,7 @@ import { formatCascader } from './cascader'
 import { formatCheckbox, formatOptionGroup, resolveOptionGroupDisplay, resolveSingleChoiceDisplay } from './choice'
 import { formatDatePicker, formatTimePicker } from './date-time'
 import { formatInput, formatInputNumber } from './input'
+import { resolveInputTagDisplay } from './input-tag'
 import { extractOptions } from './options'
 import { resolveRateDisplay } from './rate'
 import { resolveSelectDisplay, formatSelect } from './select'
@@ -39,10 +40,12 @@ const TEXT_FORMATTERS: Record<string, TextFormatter> = {
   ElTimeSelect: formatSimple,
   ElRate: formatSimple,
   ElColorPicker: formatSimple,
+  ElColorPickerPanel: formatSimple,
   ElSwitch: formatSwitch,
   ElSlider: formatSlider,
   ElSegmented: formatSegmented,
   ElDatePicker: formatDatePicker,
+  ElDatePickerPanel: formatDatePicker,
   ElTimePicker: formatTimePicker,
   ElCascader: formatCascader,
   ElTransfer: formatTransfer
@@ -64,6 +67,7 @@ const CUSTOM_DISPLAY_RESOLVERS: Record<string, CustomDisplayResolver> = {
   ElRadioButton: (_value, vnode) => resolveSingleChoiceDisplay(vnode),
   ElCheckboxButton: (_value, vnode) => resolveSingleChoiceDisplay(vnode),
   ElCheckbox: (_value, vnode) => resolveSingleChoiceDisplay(vnode),
+  ElInputTag: resolveInputTagDisplay,
   ElRate: resolveRateDisplay
 }
 

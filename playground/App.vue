@@ -146,6 +146,21 @@
                 <el-rate v-model="model.rate" />
               </TextFormItem>
             </el-col>
+            <el-col :xs="24" :md="12">
+              <TextFormItem label="输入标签（标签样式）" prop="tags" input-tag-mode="tag">
+                <el-input-tag v-model="model.tags" tag-type="success" />
+              </TextFormItem>
+            </el-col>
+            <el-col :xs="24" :md="12">
+              <TextFormItem label="提及" prop="mention">
+                <el-mention v-model="model.mention" :options="mentionOptions" prefix="@" />
+              </TextFormItem>
+            </el-col>
+            <el-col :xs="24" :md="12">
+              <TextFormItem label="自动补全" prop="autocomplete">
+                <el-autocomplete v-model="model.autocomplete" :fetch-suggestions="querySearch" placeholder="请输入" />
+              </TextFormItem>
+            </el-col>
           </el-row>
         </section>
 
@@ -178,6 +193,38 @@
                   start-placeholder="开始日期"
                   end-placeholder="结束日期"
                 />
+              </TextFormItem>
+            </el-col>
+            <el-col :xs="24" :md="12">
+              <TextFormItem label="季度" prop="quarter">
+                <el-date-picker v-model="model.quarter" type="quarter" placeholder="选择季度" />
+              </TextFormItem>
+            </el-col>
+            <el-col :xs="24" :md="12">
+              <TextFormItem label="季度范围" prop="quarterRange">
+                <el-date-picker
+                  v-model="model.quarterRange"
+                  type="quarterrange"
+                  range-separator="至"
+                  start-placeholder="开始季度"
+                  end-placeholder="结束季度"
+                />
+              </TextFormItem>
+            </el-col>
+            <el-col :xs="24" :md="12">
+              <TextFormItem label="年份范围" prop="yearRange">
+                <el-date-picker
+                  v-model="model.yearRange"
+                  type="yearrange"
+                  range-separator="至"
+                  start-placeholder="开始年份"
+                  end-placeholder="结束年份"
+                />
+              </TextFormItem>
+            </el-col>
+            <el-col :xs="24" :md="12">
+              <TextFormItem label="月份（多选）" prop="months">
+                <el-date-picker v-model="model.months" type="months" placeholder="选择月份" />
               </TextFormItem>
             </el-col>
             <el-col :xs="24" :md="12">
@@ -387,10 +434,17 @@ const model = reactive({
   switch: true,
   slider: [20, 60],
   rate: 4,
+  tags: ['Vue', 'Element Plus'],
+  mention: '@张三 请确认一下',
+  autocomplete: 'Element Plus',
   color: '#409eff',
   date: new Date(2024, 4, 20),
   datetime: new Date(2024, 4, 20, 10, 30, 0),
   daterange: [new Date(2024, 4, 1), new Date(2024, 4, 20)],
+  quarter: new Date(2024, 4, 20),
+  quarterRange: [new Date(2024, 0, 1), new Date(2024, 6, 1)],
+  yearRange: [new Date(2023, 0, 1), new Date(2025, 0, 1)],
+  months: [new Date(2024, 0, 1), new Date(2024, 4, 1)],
   time: new Date(2024, 4, 20, 9, 15, 0),
   timeRange: [new Date(2024, 4, 20, 9, 0, 0), new Date(2024, 4, 20, 18, 0, 0)],
   timeSelect: '09:30',
@@ -421,6 +475,21 @@ const languageOptions = [
   { label: 'Element Plus', value: 'element-plus' },
   { label: 'VitePress', value: 'vitepress' }
 ]
+
+const mentionOptions = [
+  { label: '张三', value: '张三' },
+  { label: '李四', value: '李四' },
+  { label: '王五', value: '王五' }
+]
+
+const autocompleteOptions = ['Element Plus', 'Vue', 'Vite', 'VitePress', 'TypeScript']
+
+function querySearch(query: string, callback: (items: Array<{ value: string }>) => void): void {
+  const keyword = query.trim().toLowerCase()
+  callback(
+    autocompleteOptions.filter((item) => !keyword || item.toLowerCase().includes(keyword)).map((value) => ({ value }))
+  )
+}
 
 const groupOptions = [
   {

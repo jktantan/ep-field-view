@@ -110,6 +110,7 @@ const theme = computed(() => setting('theme', props.theme))
 const shouldSkipValidation = computed(() => setting('skipValidation', props.skipValidation))
 const includeAffixes = computed(() => setting('includeAffixes', props.includeAffixes))
 const rateMode = computed(() => setting('rateMode', props.rateMode))
+const inputTagMode = computed(() => setting('inputTagMode', props.inputTagMode))
 
 /**
  * 中文：匹配父级表单 / 表单项的尺寸，让文本内容同步缩放。
@@ -144,7 +145,8 @@ const mergedConfig = computed<EpFieldViewConfig>(() => ({
   skipValidation: shouldSkipValidation.value,
   optionProps: optionProps.value,
   includeAffixes: includeAffixes.value,
-  rateMode: rateMode.value
+  rateMode: rateMode.value,
+  inputTagMode: inputTagMode.value
 }))
 
 function findParentForm(target: ComponentInternalInstance | null | undefined): ComponentInternalInstance | null {
@@ -231,7 +233,8 @@ const formatContext = computed<FormatContext>(() => ({
   timeFormat: timeFormat.value,
   optionProps: optionProps.value,
   includeAffixes: includeAffixes.value,
-  rateMode: rateMode.value
+  rateMode: rateMode.value,
+  inputTagMode: inputTagMode.value
 }))
 
 const displayText = computed(() => {

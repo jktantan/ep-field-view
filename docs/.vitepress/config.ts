@@ -19,6 +19,7 @@ export default defineConfig({
     nav: [
       { text: '指南', link: '/guide/installation' },
       { text: '组件', link: '/components/text-form-item' },
+      { text: '演示', link: '/components/demo' },
       { text: '更新日志', link: '/changelog' }
     ],
     sidebar: {
@@ -37,7 +38,10 @@ export default defineConfig({
       '/components/': [
         {
           text: '组件',
-          items: [{ text: 'TextFormItem', link: '/components/text-form-item' }]
+          items: [
+            { text: 'TextFormItem', link: '/components/text-form-item' },
+            { text: '演示', link: '/components/demo' }
+          ]
         }
       ]
     },

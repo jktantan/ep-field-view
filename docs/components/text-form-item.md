@@ -37,11 +37,12 @@ Element Plus 表单字段有三种相互独立的状态：
 | `nowrap`         | 单行省略；表格内默认开启                                       | `boolean`                                       | 表格内 `true`                                                                    |
 | `skipValidation` | 文本模式跳过校验                                               | `boolean`                                       | `true`                                                                           |
 | `rateMode`       | `el-rate` 的显示方式：`text` 分数 / `rate` 评分样式            | `'text' \| 'rate'`                              | `text`                                                                           |
+| `inputTagMode`   | `el-input-tag` 的显示方式：`text` 文本 / `tag` 只读标签        | `'text' \| 'tag'`                               | `text`                                                                           |
 | `theme`          | 主题名，添加 `ep-field-view--theme-{name}` 类                  | `string`                                        | `''`                                                                             |
 | `contentClass`   | 文本内容元素的额外类名                                         | `string \| string[] \| Record<string, boolean>` | —                                                                                |
 | `contentStyle`   | 文本内容元素的内联样式                                         | `StyleValue`                                    | —                                                                                |
 
-> 未传 `text`、`nowrap`、`skipValidation`、`rateMode` 时使用 `undefined`，以便继承表单或全局配置；显式 `false` 会覆盖继承值。
+> 未传 `text`、`nowrap`、`skipValidation`、`rateMode`、`inputTagMode` 时使用 `undefined`，以便继承表单或全局配置；显式 `false` 会覆盖继承值。
 
 ### FieldViewFormatter
 
@@ -110,6 +111,7 @@ interface FieldViewOptionProps {
 | `theme`          | `string`               | `''`   | 默认主题                          |
 | `skipValidation` | `boolean`              | `true` | 文本模式跳过校验                  |
 | `rateMode`       | `'text' \| 'rate'`     | `text` | 评分显示方式                      |
+| `inputTagMode`   | `'text' \| 'tag'`      | `text` | 输入标签显示方式                  |
 | `nowrapInTable`  | `boolean`              | `true` | 表格内自动省略                    |
 | `optionProps`    | `FieldViewOptionProps` | 见上   | 选项字段映射                      |
 | `includeAffixes` | `boolean`              | `true` | 拼接输入框前后缀插槽文本          |
@@ -138,7 +140,7 @@ import EpFieldView, {
 } from 'ep-field-view'
 ```
 
-类型导出：`EpFieldViewConfig`、`EpFieldViewOptions`、`TextFormItemProps`、`RateMode`、`FieldViewFormatter`、`FieldViewFormatterContext`、`FieldViewOption`、`FieldViewOptionProps`。
+类型导出：`EpFieldViewConfig`、`EpFieldViewOptions`、`TextFormItemProps`、`RateMode`、`InputTagMode`、`FieldViewFormatter`、`FieldViewFormatterContext`、`FieldViewOption`、`FieldViewOptionProps`。
 
 ## 注意事项
 

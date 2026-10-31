@@ -59,6 +59,15 @@ export type FieldViewFormatter = (
 export type RateMode = 'text' | 'rate'
 
 /**
+ * 中文：`el-input-tag` 的文本模式展示方式。`text` 显示分隔符文本，
+ * `tag` 渲染只读 `el-tag`。
+ *
+ * English: How `el-input-tag` is displayed in text mode. `text` shows
+ * separator-joined text; `tag` renders readonly `el-tag`s.
+ */
+export type InputTagMode = 'text' | 'tag'
+
+/**
  * 中文：通过 `app.use(EpFieldView, options)` 注册的全局配置。
  *
  * English: Global configuration registered through `app.use(EpFieldView, options)`.
@@ -144,6 +153,12 @@ export interface EpFieldViewConfig {
    * English: How `el-rate` is rendered in text mode.
    */
   rateMode: RateMode
+  /**
+   * 中文：`el-input-tag` 的展示方式，默认 `text`。
+   *
+   * English: How `el-input-tag` is rendered in text mode.
+   */
+  inputTagMode: InputTagMode
 }
 
 export type EpFieldViewOptions = Partial<EpFieldViewConfig>
@@ -252,6 +267,12 @@ export interface TextFormItemProps {
    * English: How `el-rate` is rendered in text mode. Defaults to `text`.
    */
   rateMode?: RateMode
+  /**
+   * 中文：`el-input-tag` 的展示方式，默认 `text`。
+   *
+   * English: How `el-input-tag` is rendered in text mode. Defaults to `text`.
+   */
+  inputTagMode?: InputTagMode
   /**
    * 中文：主题名，添加 `ep-field-view--theme-{name}` 类。
    *

@@ -1,6 +1,6 @@
-import dayjs from 'dayjs'
 import type { VNode } from 'vue'
 import { DEFAULT_DATE_FORMAT, DEFAULT_DATE_FORMATS, DEFAULT_TIME_FORMAT, RANGE_DATE_TYPES } from '../constants'
+import dayjs from '../utils/date'
 import { getVNodeProp } from '../utils/vnode'
 import type { FormatContext } from './types'
 
