@@ -1,11 +1,11 @@
 # VNode 解析设计
 
-只读值不是从组件的 `v-model` 反向读取，而是从默认插槽的 VNode 结构推导。本文说明解析流程、支持的组件与边界。
+文本值不是从组件的 `v-model` 反向读取，而是从默认插槽的 VNode 结构推导。本文说明解析流程、支持的组件与边界。
 
 ## 入口
 
 ```
-ReadonlyFormItem
+TextFormItem
   └── slots.default()                     // 父组件插槽，返回 VNode[]
         └── findComponentVNode(...)       // 深度优先，找到第一个可识别组件
               └── getComponentName(vnode) // ElSelect / ElDatePicker / ...
@@ -21,7 +21,7 @@ ReadonlyFormItem
 - 选项组：`ElRadioGroup`、`ElRadio`、`ElRadioButton`、`ElCheckboxGroup`、`ElCheckbox`、`ElCheckboxButton`
 - 日期时间：`ElDatePicker`、`ElTimePicker`
 
-未识别的组件走通用格式化，或由 `formatter` / `readonly` 插槽接管。
+未识别的组件走通用格式化，或由 `formatter` / `text` 插槽接管。
 
 ## 选项收集
 
@@ -64,7 +64,7 @@ ReadonlyFormItem
 
 ## 富内容
 
-文本无法保留图标、`el-tag`、颜色等，因此只读态提供 `resolveCustomDisplay`：
+文本无法保留图标、`el-tag`、颜色等，因此文本模式提供 `resolveCustomDisplay`：
 
 ```
 el-select 的 #label 插槽  ──► 渲染 VNode
@@ -73,7 +73,7 @@ el-radio / el-checkbox 选中项默认插槽中的元素 ──► 渲染 VNode
 
 关键约束：
 
-1. **只使用组件最终选中显示相关的插槽**。`el-option` 的 `#label` 只影响下拉列表，选中值由 `el-select` 的 `#label` 或 option `label` 决定，因此不用于只读值。
+1. **只使用组件最终选中显示相关的插槽**。`el-option` 的 `#label` 只影响下拉列表，选中值由 `el-select` 的 `#label` 或 option `label` 决定，因此不用于文本值。
 2. **纯文本不渲染 VNode**。`containsElementVNode` 判断默认插槽是否包含元素；纯文本继续走字符串格式化，避免模板缩进产生的空白进入分隔符。
 3. **VNode 每次更新重新求值**。`customContent` 读取 `revision`，`onBeforeUpdate` 递增 revision，避免复用已挂载的 VNode。
 4. **`formatter` 优先**。显式 formatter 时只输出文本。
@@ -90,24 +90,24 @@ el-radio / el-checkbox 选中项默认插槽中的元素 ──► 渲染 VNode
 
 ## 边界与扩展
 
-| 场景                                 | 行为                     | 建议                                              |
-| ------------------------------------ | ------------------------ | ------------------------------------------------- |
-| 自定义组件包装 `el-select`           | 无法识别内部组件         | 用 `formatter`、显式 `options` 或 `readonly` 插槽 |
-| 选项完全来自接口                     | 插槽中无静态 option      | 传 `options` / `optionProps`                      |
-| `el-option` 的富内容需要在只读态显示 | 默认不会进入选中值       | 在 `el-select` 上提供 `#label` 插槽               |
-| 需要链接、图片、头像组               | 文本/VNode 无法满足      | 使用 `readonly` 插槽                              |
-| 组件名在 EP 升级后变化               | 解析失败，回退通用格式化 | 升级计划中的回归清单必查项                        |
+| 场景                                   | 行为                     | 建议                                          |
+| -------------------------------------- | ------------------------ | --------------------------------------------- |
+| 自定义组件包装 `el-select`             | 无法识别内部组件         | 用 `formatter`、显式 `options` 或 `text` 插槽 |
+| 选项完全来自接口                       | 插槽中无静态 option      | 传 `options` / `optionProps`                  |
+| `el-option` 的富内容需要在文本模式显示 | 默认不会进入选中值       | 在 `el-select` 上提供 `#label` 插槽           |
+| 需要链接、图片、头像组                 | 文本/VNode 无法满足      | 使用 `text` 插槽                              |
+| 组件名在 EP 升级后变化                 | 解析失败，回退通用格式化 | 升级计划中的回归清单必查项                    |
 
 ## 代码位置
 
 - 组件识别与 VNode 工具：`src/utils/vnode.ts`
-- 选项与格式化：`src/utils/format.ts`（`extractOptions`、`formatFieldValue`、`resolveCustomDisplay`）
+- 选项与格式化：`src/formatters/`（`options.ts`、`index.ts`、各组件文件）
 - 组件清单与日期格式：`src/constants.ts`
-- 渲染入口：`src/components/ReadonlyFormItem.vue`
+- 渲染入口：`src/components/TextFormItem.vue`
 
 ## 测试建议
 
 - 新增组件解析：覆盖单选、多选、范围、空值、异步 options；
 - 新增 VNode 行为：断言富内容元素存在（而不仅是文本）；
-- 修改选项语义：同时验证编辑态选中值与只读值的文本一致；
+- 修改选项语义：同时验证编辑态选中值与文本值的文本一致；
 - 保留一个“纯文本不引入模板空白”的用例。

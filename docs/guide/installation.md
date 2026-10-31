@@ -65,19 +65,19 @@ createApp(App)
 `app.use(EpFieldView, options)` 会完成两件事：
 
 1. 提供全局配置（可通过 `emptyText`、`separator`、`rangeSeparator`、`dateFormat`、`timeFormat`、`theme` 等覆盖默认值）；
-2. 全局注册 `<ReadonlyFormItem>` 组件。
+2. 全局注册 `<TextFormItem>` 组件。
 
 ### 局部引入
 
 ```vue
 <script setup lang="ts">
-import { ReadonlyFormItem } from 'ep-field-view'
+import { TextFormItem } from 'ep-field-view'
 </script>
 
 <template>
-  <ReadonlyFormItem label="姓名" prop="name">
+  <TextFormItem label="姓名" prop="name">
     <el-input v-model="model.name" />
-  </ReadonlyFormItem>
+  </TextFormItem>
 </template>
 ```
 

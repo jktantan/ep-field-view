@@ -1,8 +1,12 @@
 /**
- * Read a nested value from an object using a dot/bracket path.
+ * 中文：按点号 / 方括号路径读取嵌套值。
  *
- * `getByPath(model, 'user.address[0].city')` and
- * `getByPath(model, 'user.address.0.city')` are equivalent.
+ * `getByPath(model, 'user.address[0].city')` 与
+ * `getByPath(model, 'user.address.0.city')` 等价。
+ *
+ * English: Read a nested value from an object using a dot/bracket path.
+ *
+ * The two calls above are equivalent.
  */
 export function getByPath(source: unknown, path?: string): unknown {
   if (!path) return source
@@ -19,8 +23,10 @@ export function getByPath(source: unknown, path?: string): unknown {
 }
 
 /**
- * A value is considered empty when it renders as nothing in a form. `0` and
- * `false` are meaningful values and are therefore NOT empty.
+ * 中文：判断值是否为空。`0` 与 `false` 是有效值，不视为空。
+ *
+ * English: A value is empty when it renders as nothing in a form. `0` and
+ * `false` are meaningful values and are NOT empty.
  */
 export function isEmptyValue(value: unknown): boolean {
   if (value === null || value === undefined || value === '') return true
@@ -32,9 +38,10 @@ export function isEmptyValue(value: unknown): boolean {
 }
 
 /**
- * Compare two option values. Primitives are compared both strictly and by
- * string representation so that `1` and `'1'` match, as they do in Element Plus
- * selects.
+ * 中文：比较两个选项值。原始类型同时按严格值与字符串比较，`1` 与 `'1'` 视为相同。
+ *
+ * English: Compare two option values. Primitives are compared strictly and by
+ * string representation, so `1` and `'1'` match.
  */
 export function isSameValue(left: unknown, right: unknown): boolean {
   if (Object.is(left, right)) return true
@@ -44,7 +51,9 @@ export function isSameValue(left: unknown, right: unknown): boolean {
 }
 
 /**
- * Best-effort label for a plain object value.
+ * 中文：为普通对象值取一个最佳展示文案。
+ *
+ * English: Best-effort label for a plain object value.
  */
 export function getObjectLabel(value: object): string | undefined {
   const record = value as Record<string, unknown>
@@ -56,7 +65,9 @@ export function getObjectLabel(value: object): string | undefined {
 }
 
 /**
- * Convert a primitive value to text.
+ * 中文：将原始值转换为字符串。
+ *
+ * English: Convert a primitive value to text.
  */
 export function toText(value: unknown): string {
   if (value === null || value === undefined) return ''

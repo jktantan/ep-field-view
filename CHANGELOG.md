@@ -9,10 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- `ReadonlyFormItem` component: renders the default slot in edit mode and a
-  formatted value in read-only mode.
-- Inherit `readonly` from `el-form` (fallthrough attribute), per-field override,
+- `TextFormItem` component: renders the default slot in edit mode and a
+  formatted value in text mode.
+- Inherit `text` from `el-form` (fallthrough attribute), per-field override,
   and runtime switching via `MutationObserver`.
+- Text mode is independent from Element Plus' native `disabled` / `readonly`
+  states; `el-form readonly` does not trigger text mode.
 - Automatic label resolution for `el-select`, `el-select-v2`, `el-radio-group`,
   `el-checkbox-group`, `el-cascader`, `el-transfer`, `el-tree-select`,
   `el-segmented`, `el-date-picker`, `el-time-picker`, `el-switch`,
@@ -22,15 +24,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Global configuration: `emptyText`, `separator`, `rangeSeparator`,
   `dateFormat`, `timeFormat`, `activeText`, `inactiveText`, `theme`,
   `skipValidation`, `nowrapInTable`, `optionProps`.
-- `formatter`, `readonly` slot, explicit `options` / `optionProps`.
+- `formatter`, `text` slot, explicit `options` / `optionProps`.
+- Configurable `rateMode`: plain score text (default) or a disabled
+  `el-rate` that preserves custom icons/images.
+- Multiple values use a configurable separator, defaulting to `;`.
 - Component-provided display: `el-select`'s `#label` slot and the selected
   radio/checkbox default slot are rendered as VNodes (rich content preserved);
   input affix slot text and the `el-input-number` `formatter` are also reused.
-- Read-only rows follow the form / form-item `size` for their minimum height and
+- Text rows follow the form / form-item `size` for their minimum height and
   font size (small: 12px, default/large: 14px, matching Element Plus).
 - Theming: CSS variables, built-in `compact` / `bold` / `plain` themes,
   arbitrary custom theme classes, dark mode.
-- Skip validation while read-only and restore field registration on edit.
+- Skip validation in text mode and restore field registration on edit.
 - Table-friendly layout: automatic spacing removal and single-line ellipsis.
 - TypeScript types, ESM / UMD / CSS / sourcemaps.
 - VitePress docs, playground, Vitest tests, ESLint / Stylelint / Prettier,
@@ -39,7 +44,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed (compared to the reference implementation)
 
 - `0` and `false` are no longer treated as empty values.
-- Runtime `el-form readonly` toggling works immediately (no polling).
+- Runtime `el-form text` toggling works immediately (no polling).
 - No VNode prop mutation to bypass validation.
 - More consistent separators for multiple and range values.
 - Cascader single values, `emitPath: false`, and multiple modes no longer throw.

@@ -4,26 +4,27 @@
 
 ## 项目状态
 
-| 项       | 状态                                                              |
-| -------- | ----------------------------------------------------------------- |
-| 当前版本 | `0.1.0`（首个公开版本）                                           |
-| 组件 API | `ReadonlyFormItem`，兼容 element-plus-readonly-form-item 常用 API |
-| 测试     | Vitest，34 个用例，覆盖核心值解析、只读切换、校验、主题与插槽     |
-| 文档     | VitePress 中文文档 + 本地搜索                                     |
-| 发布     | npmjs（`ep-field-view`），ESM / UMD / CSS / d.ts                  |
+| 项       | 状态                                                          |
+| -------- | ------------------------------------------------------------- |
+| 当前版本 | `0.1.0`（首个公开版本）                                       |
+| 组件 API | `TextFormItem`，参考其能力模型（API 使用 text 命名）          |
+| 测试     | Vitest，44 个用例，覆盖核心值解析、文本切换、校验、主题与插槽 |
+| 文档     | VitePress 中文文档 + 本地搜索                                 |
+| 发布     | npmjs（`ep-field-view`），ESM / UMD / CSS / d.ts              |
 
 ## 版本路线
 
 ### v0.1.0 · 基础版本（已完成）
 
 - [x] 组件核心：model 取值、显式 `value`、嵌套路径
-- [x] 只读继承 `el-form readonly`，支持动态切换
+- [x] 明确 `text` 与 Element Plus 原生 `disabled` / `readonly` 的三种状态区分
+- [x] 文本模式继承 `el-form text`，支持动态切换
 - [x] 常见表单组件值解析：input、number、select、radio、checkbox、switch、slider、rate、color、date、time、cascader、transfer、tree-select、segmented
 - [x] 空值、0/false、数组、范围、日期/时间格式化
-- [x] `formatter` 与 `readonly` 插槽
+- [x] `formatter` 与 `text` 插槽
 - [x] 全局配置与局部覆盖
 - [x] 主题 CSS 变量、内置主题、暗色模式
-- [x] 只读跳过校验，编辑态恢复
+- [x] 文本模式跳过校验，编辑态恢复
 - [x] playground 全组件演示
 - [x] Vitest 单元测试、ESLint / Stylelint / Prettier
 - [x] VitePress 文档、npm 发布配置、CI
@@ -41,13 +42,13 @@
 - [ ] 增加 Playwright 视觉回归（浅色、暗色、compact 主题）
 - [ ] 覆盖率提升到 85% 以上（语句与分支）
 
-**验收标准**：新增用例全部通过；长表单（200 个只读项）切换耗时不超过 100ms；视觉回归通过。
+**验收标准**：新增用例全部通过；长表单（200 个文本项）切换耗时不超过 100ms；视觉回归通过。
 
 ### v0.3.0 · 扩展能力（预计 1 个月）
 
 - [ ] 常用 `formatter` 预设：金额、百分比、日期、字典映射
-- [ ] 对象/数组字段的结构化展示（只读 JSON 预览组件或插槽示例）
-- [ ] `ElUpload` 文件列表、`ElImage` 图片预览的只读展示
+- [ ] 对象/数组字段的结构化展示（文本 JSON 预览组件或插槽示例）
+- [ ] `ElUpload` 文件列表、`ElImage` 图片预览的文本展示
 - [ ] `ElCascader` 多选 `emitPath: false` 的完整路径与去重优化
 - [ ] 支持 `el-config-provider` 命名空间下的类名覆盖（可选方案）
 - [ ] 发布 GitHub Pages 文档站点
@@ -86,5 +87,5 @@
 
 - 插槽 VNode 解析依赖 Element Plus 组件的内部名称，Element Plus 大版本升级时需要回归。
 - `MutationObserver` 仅运行在客户端；SSR 首屏使用初始 attrs 值。
-- 只读切换会重建 `ElFormItem`，瞬时校验状态会重置。
+- 文本切换会重建 `ElFormItem`，瞬时校验状态会重置。
 - 样式集中在一个 CSS 文件中，不随组件自动注入；宿主必须引入 `ep-field-view/style.css`。

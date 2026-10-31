@@ -7,8 +7,8 @@
 ### 设计与实现
 
 1. [架构设计](./design/architecture.md) — 模块划分、数据流、关键取舍
-2. [VNode 解析设计](./design/vnode-resolution.md) — 如何从插槽推导只读值
-3. [只读状态与校验设计](./design/form-readonly.md) — `el-form readonly` 同步、校验跳过与恢复
+2. [VNode 解析设计](./design/vnode-resolution.md) — 如何从插槽推导文本值
+3. [文本模式与校验设计](./design/form-text.md) — `el-form text` 同步、校验跳过与恢复
 
 ### 开发与维护
 
@@ -27,11 +27,11 @@
 
 ```
 src/
-  components/ReadonlyFormItem.vue   组件主体：状态、slot 解析、渲染、校验、主题类
+  components/TextFormItem.vue   组件主体：状态、slot 解析、渲染、校验、主题类
   utils/value.ts                    路径取值、空值判定、值比较、文本化
   utils/vnode.ts                    slot/VNode 工具：文本、命名插槽、默认插槽
-  utils/format.ts                   组件值格式化、选项解析、富内容解析
-  utils/form-readonly.ts            el-form readonly 的 MutationObserver 同步
+  formatters/                       按组件拆分的格式化器；index.ts 为注册表
+  utils/form-text.ts            el-form text 的 MutationObserver 同步
   config.ts                         全局配置、provide/inject、安装
   constants.ts                      默认配置、组件清单、日期格式
   types.ts                          公开类型
@@ -62,5 +62,6 @@ pnpm docs:build   # 用户文档构建
 | `README.md`                              | 使用者 + 项目概览 | 否                                 |
 | `CHANGELOG.md`                           | 使用者 + 维护者   | 否（`docs/changelog.md` 是其摘要） |
 | `CONTRIBUTING.md` / `RELEASING.md`（根） | GitHub 入口       | 否                                 |
+| `AGENTS.md`                              | AI 代理 / 贡献者  | 否                                 |
 
 新增开发者内容请放在本目录对应的子目录中，不要把计划、设计或内部实现说明写进 `docs/`。

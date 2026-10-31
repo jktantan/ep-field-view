@@ -18,10 +18,10 @@ pnpm docs:dev   # 文档
 
 ```
 src/
-  components/ReadonlyFormItem.vue   组件主体
-  utils/format.ts                   值解析与格式化
+  components/TextFormItem.vue   组件主体
+  formatters/                       按组件拆分的格式化器（index.ts 为注册表）
   utils/vnode.ts                    插槽 VNode 解析
-  utils/form-readonly.ts            el-form readonly 同步
+  utils/form-text.ts            el-form text 同步
   styles/index.css                  CSS 变量与内置主题
   config.ts / constants.ts / types.ts
 playground/                         开发演示页
@@ -57,7 +57,7 @@ developer/                          设计、开发与计划文档
 ## 测试要求
 
 - 值解析修复 / 新增：至少一个单元测试覆盖对应组件与边界值；
-- 只读切换与校验：覆盖只读 → 编辑 → 只读完整链路；
+- 文本切换与校验：覆盖文本 → 编辑 → 文本完整链路；
 - UI / 主题变更：附 playground 截图；
 - 所有 PR 必须通过：
   ```bash
@@ -69,7 +69,7 @@ developer/                          设计、开发与计划文档
 ## 文档
 
 - 用户文档位于 `docs/`，使用 VitePress；开发者文档位于 `developer/`；
-- 组件 API 变更同步更新 `docs/components/readonly-form-item.md`；
+- 组件 API 变更同步更新 `docs/components/text-form-item.md`；
 - 在 `CHANGELOG.md` 的 `Unreleased` 或对应版本下记录变更；
 - 版本计划见 [`developer/plan/`](../plan/roadmap.md)。
 

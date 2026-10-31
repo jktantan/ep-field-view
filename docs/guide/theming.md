@@ -12,14 +12,14 @@
 
 | 变量                            | 默认值                             | 说明                           |
 | ------------------------------- | ---------------------------------- | ------------------------------ |
-| `--ep-field-view-color`         | `var(--el-text-color-regular)`     | 只读文本颜色                   |
+| `--ep-field-view-color`         | `var(--el-text-color-regular)`     | 文本颜色                       |
 | `--ep-field-view-empty-color`   | `var(--el-text-color-placeholder)` | 空值文本颜色                   |
 | `--ep-field-view-font-size`     | `var(--el-font-size-base)`         | 字号                           |
 | `--ep-field-view-font-weight`   | `400`                              | 字重                           |
 | `--ep-field-view-line-height`   | `1.6`                              | 行高                           |
 | `--ep-field-view-word-break`    | `break-all`                        | 长文本断行策略                 |
 | `--ep-field-view-content-width` | `100%`                             | 内容宽度                       |
-| `--ep-field-view-min-height`    | `var(--el-component-size)`         | 只读行最小高度（随 size 变化） |
+| `--ep-field-view-min-height`    | `var(--el-component-size)`         | 文本行最小高度（随 size 变化） |
 
 ```css
 /* 某个详情页容器内统一调整 */
@@ -31,7 +31,7 @@
 
 ## 尺寸联动
 
-只读文本自动跟随 `el-form` 或 `ReadonlyFormItem` 的 `size`，无需额外配置：
+文本自动跟随 `el-form` 或 `TextFormItem` 的 `size`，无需额外配置：
 
 | size      | 字号                                 | 最小高度                            | 类名                        |
 | --------- | ------------------------------------ | ----------------------------------- | --------------------------- |
@@ -52,9 +52,9 @@
 | `plain`   | 次要文本颜色，适合信息密度低的详情页 |
 
 ```vue
-<ReadonlyFormItem label="姓名" prop="name" theme="compact">
+<TextFormItem label="姓名" prop="name" theme="compact">
   <el-input v-model="model.name" />
-</ReadonlyFormItem>
+</TextFormItem>
 ```
 
 ```ts
@@ -75,9 +75,9 @@ app.use(EpFieldView, { theme: 'compact' })
 传入任意主题名，组件会添加 `ep-field-view--theme-{name}` 类，宿主自行定义样式即可：
 
 ```vue
-<ReadonlyFormItem label="品牌字段" prop="brand" theme="brand">
+<TextFormItem label="品牌字段" prop="brand" theme="brand">
   <el-input v-model="model.brand" />
-</ReadonlyFormItem>
+</TextFormItem>
 ```
 
 ```css
@@ -87,17 +87,17 @@ app.use(EpFieldView, { theme: 'compact' })
 }
 ```
 
-也可配合 `content-class` / `content-style` 只影响只读内容元素：
+也可配合 `content-class` / `content-style` 只影响文本内容元素：
 
 ```vue
-<ReadonlyFormItem
+<TextFormItem
   label="金额"
   prop="amount"
   content-class="amount-value"
   :content-style="{ fontVariantNumeric: 'tabular-nums' }"
 >
   <el-input-number v-model="model.amount" />
-</ReadonlyFormItem>
+</TextFormItem>
 ```
 
 ## 暗色模式
@@ -133,5 +133,5 @@ document.documentElement.classList.toggle('dark', isDark)
 需要保持多行显示时显式关闭：
 
 ```vue
-<ReadonlyFormItem :value="row.note" :nowrap="false" />
+<TextFormItem :value="row.note" :nowrap="false" />
 ```

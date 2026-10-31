@@ -7,7 +7,9 @@ interface ComponentType {
 }
 
 /**
- * Resolve the component name of a VNode, if it has one.
+ * 中文：解析 VNode 的组件名（如果存在）。
+ *
+ * English: Resolve the component name of a VNode, if it has one.
  */
 export function getComponentName(vnode: VNode | null | undefined): string | undefined {
   if (!vnode || vnode.type === null || vnode.type === undefined) return undefined
@@ -20,8 +22,9 @@ export function getComponentName(vnode: VNode | null | undefined): string | unde
 }
 
 /**
- * Read a prop from a VNode, accepting both camelCase and kebab-case names
- * (`activeText` / `active-text`).
+ * 中文：读取 VNode 的 prop，同时兼容 camelCase 与 kebab-case。
+ *
+ * English: Read a prop from a VNode, accepting camelCase and kebab-case names.
  */
 export function getVNodeProp(vnode: VNode | null | undefined, ...names: string[]): unknown {
   const props = vnode?.props
@@ -33,8 +36,10 @@ export function getVNodeProp(vnode: VNode | null | undefined, ...names: string[]
 }
 
 /**
- * Flatten slot children, template fragments and text nodes into a list of
- * VNodes.
+ * 中文：将插槽子节点、模板 Fragment 与文本节点展开为 VNode 列表。
+ *
+ * English: Flatten slot children, template fragments and text nodes into a list
+ * of VNodes.
  */
 export function flattenVNodes(input: unknown): VNode[] {
   if (input === null || input === undefined || typeof input === 'boolean') return []
@@ -47,8 +52,10 @@ export function flattenVNodes(input: unknown): VNode[] {
 }
 
 /**
- * Resolve the children of a VNode, evaluating its default slot when the
- * children were compiled into a slots object.
+ * 中文：解析 VNode 的子节点；当子节点被编译为 slots 对象时执行默认插槽。
+ *
+ * English: Resolve the children of a VNode, evaluating its default slot when
+ * the children were compiled into a slots object.
  */
 export function resolveVNodeChildren(vnode: VNode | null | undefined): VNode[] {
   if (!vnode) return []
@@ -64,7 +71,10 @@ export function resolveVNodeChildren(vnode: VNode | null | undefined): VNode[] {
 }
 
 /**
- * Return the text content of a VNode, slot result or array of children.
+ * 中文：返回 VNode、插槽结果或子节点数组的文本内容。
+ *
+ * English: Return the text content of a VNode, slot result or array of
+ * children.
  */
 export function getTextContent(input: unknown): string {
   const parts: string[] = []
@@ -73,9 +83,12 @@ export function getTextContent(input: unknown): string {
 }
 
 /**
- * Evaluate a named slot of a component VNode and return its raw content.
- * Unlike `getNamedSlotText`, this keeps the rendered VNodes so rich content
- * (icons, tags, custom markup) is preserved.
+ * 中文：执行组件的命名插槽并返回原始内容。与 `getNamedSlotText` 不同，
+ * 这里保留 VNode，以便图标、Tag、自定义结构等富内容完整渲染。
+ *
+ * English: Evaluate a named slot and return its raw content. Unlike
+ * `getNamedSlotText`, VNodes are preserved so rich content (icons, tags,
+ * custom markup) renders as-is.
  */
 export function getNamedSlotVNode(
   vnode: VNode | null | undefined,
@@ -96,7 +109,9 @@ export function getNamedSlotVNode(
 }
 
 /**
- * Return the raw default-slot content of a VNode.
+ * 中文：返回 VNode 的默认插槽原始内容。
+ *
+ * English: Return the raw default-slot content of a VNode.
  */
 export function getDefaultSlotVNode(vnode: VNode | null | undefined): VNodeChild | undefined {
   const { children } = vnode ?? {}
@@ -113,8 +128,10 @@ export function getDefaultSlotVNode(vnode: VNode | null | undefined): VNodeChild
 }
 
 /**
- * Evaluate a named slot of a component VNode and return its text content.
- * Returns an empty string when the slot does not exist or throws.
+ * 中文：执行组件的命名插槽并返回文本内容；插槽不存在或抛错时返回空字符串。
+ *
+ * English: Evaluate a named slot and return its text content. Returns an empty
+ * string when the slot is missing or throws.
  */
 export function getNamedSlotText(vnode: VNode | null | undefined, name: string, scope?: unknown): string {
   const { children } = vnode ?? {}
@@ -141,8 +158,8 @@ function collectText(input: unknown, parts: string[]): void {
     return
   }
   if (typeof input === 'object') {
-    // Compiled component children are a slots object. Evaluate its default
-    // slot so text inside `<el-radio>` / `<el-checkbox>` is picked up.
+    // 中文：组件 children 被编译为 slots 对象时执行默认插槽，以获取文本。
+    // English: Evaluate the default slot when children are a slots object.
     const slot = (input as Record<string, unknown>).default
     if (typeof slot === 'function') {
       collectText((slot as () => unknown)(), parts)
@@ -155,15 +172,18 @@ function collectText(input: unknown, parts: string[]): void {
     collectText(input.children, parts)
     return
   }
-  // Option labels live in the children of `<el-radio>` / `<el-checkbox>` /
-  // `<el-option>`, so component subtrees must be traversed as well. Icons and
-  // other components simply contribute no text.
+  // 中文：选项文本位于组件子节点中，需要继续遍历；图标通常没有文本。
+  // English: Option labels live in component children, so subtrees are
+  // traversed; icons simply contribute no text.
   collectText(input.children, parts)
 }
 
 /**
- * Depth-first search for the first component VNode whose name is in `names`.
- * Only VNodes that are already present in the slot tree are inspected, so the
+ * 中文：深度优先查找第一个名称在 `names` 中的组件 VNode。只检查插槽树中
+ * 已存在的 VNode，不会挂载或执行子组件。
+ *
+ * English: Depth-first search for the first component VNode whose name is in
+ * `names`. Only VNodes already present in the slot tree are inspected, so the
  * search never mounts or evaluates child components.
  */
 export function findComponentVNode(vnodes: VNode[], names: Set<string>): VNode | null {
@@ -185,8 +205,10 @@ export function findComponentVNode(vnodes: VNode[], names: Set<string>): VNode |
 }
 
 /**
- * Walk up the parent component chain and return the first component matching
- * one of the given names.
+ * 中文：沿父组件链向上查找匹配名称的组件。
+ *
+ * English: Walk up the parent component chain and return the first component
+ * matching one of the given names.
  */
 export function findParentComponentName(
   instance: { parent: { type: unknown; parent: unknown } | null } | null | undefined,

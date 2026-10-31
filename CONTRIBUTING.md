@@ -5,7 +5,7 @@
 - [开发者文档索引](./developer/README.md)
 - [架构设计](./developer/design/architecture.md)
 - [VNode 解析设计](./developer/design/vnode-resolution.md)
-- [只读状态与校验设计](./developer/design/form-readonly.md)
+- [文本模式与校验设计](./developer/design/form-text.md)
 - [开发环境](./developer/development/getting-started.md)
 - [测试指南](./developer/development/testing.md)
 - [贡献流程](./developer/development/contributing.md)

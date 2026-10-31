@@ -4,7 +4,7 @@ import { defineConfig } from 'vitepress'
 export default defineConfig({
   lang: 'zh-CN',
   title: 'ep-field-view',
-  description: 'Element Plus 表单只读态组件：写一次表单，编辑与详情自动切换。',
+  description: 'Element Plus 表单文本态组件：写一次表单，编辑与详情自动切换。',
   base: process.env.DOCS_BASE || '/',
   cleanUrls: true,
   lastUpdated: true,
@@ -18,7 +18,7 @@ export default defineConfig({
   themeConfig: {
     nav: [
       { text: '指南', link: '/guide/installation' },
-      { text: '组件', link: '/components/readonly-form-item' },
+      { text: '组件', link: '/components/text-form-item' },
       { text: '更新日志', link: '/changelog' }
     ],
     sidebar: {
@@ -37,7 +37,7 @@ export default defineConfig({
       '/components/': [
         {
           text: '组件',
-          items: [{ text: 'ReadonlyFormItem', link: '/components/readonly-form-item' }]
+          items: [{ text: 'TextFormItem', link: '/components/text-form-item' }]
         }
       ]
     },

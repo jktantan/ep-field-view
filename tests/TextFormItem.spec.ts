@@ -13,6 +13,7 @@ import {
   ElOption,
   ElRadio,
   ElRadioGroup,
+  ElRate,
   ElSelect,
   ElSlider,
   ElSwitch,
@@ -20,7 +21,7 @@ import {
   ElTransfer
 } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
-import ReadonlyFormItem from '../src/components/ReadonlyFormItem.vue'
+import TextFormItem from '../src/components/TextFormItem.vue'
 import EpFieldView from '../src'
 import type { FieldViewFormatter } from '../src/types'
 
@@ -28,18 +29,18 @@ type SlotFactory = (model: Record<string, any>) => VNodeChild
 
 interface MountOptions {
   model?: Record<string, unknown>
-  readonly?: boolean | Ref<boolean>
+  text?: boolean | Ref<boolean>
   itemProps?: Record<string, unknown>
   formProps?: Record<string, unknown>
   slot?: SlotFactory
-  readonlySlot?: (scope: { text: string; value: unknown }) => VNodeChild
+  textSlot?: (scope: { text: string; value: unknown }) => VNodeChild
   labelSlot?: () => VNodeChild
   plugins?: Array<Plugin | [Plugin, Record<string, unknown>]>
 }
 
 function mountItem(options: MountOptions = {}) {
   const model = reactive(options.model ?? {})
-  const readonly = options.readonly ?? true
+  const text = options.text ?? true
 
   const Host = defineComponent({
     name: 'TestHost',
@@ -49,14 +50,14 @@ function mountItem(options: MountOptions = {}) {
           ElForm,
           {
             model,
-            readonly: unref(readonly),
+            text: unref(text),
             ...options.formProps
           } as Record<string, unknown>,
           {
             default: () =>
-              h(ReadonlyFormItem, { ...options.itemProps } as Record<string, unknown>, {
+              h(TextFormItem, { ...options.itemProps } as Record<string, unknown>, {
                 ...(options.slot ? { default: () => options.slot!(model) } : {}),
-                ...(options.readonlySlot ? { readonly: options.readonlySlot } : {}),
+                ...(options.textSlot ? { text: options.textSlot } : {}),
                 ...(options.labelSlot ? { label: options.labelSlot } : {})
               })
           }
@@ -74,17 +75,21 @@ function content(wrapper: ReturnType<typeof mount>) {
   return wrapper.find('.ep-field-view__content').text()
 }
 
-/** Wait for Vue updates and for the form element's MutationObserver callback. */
+/**
+ * 中文：等待 Vue 更新与表单 text 属性的 MutationObserver 回调。
+ *
+ * English: Wait for Vue updates and the form text MutationObserver callback.
+ */
 async function settle(): Promise<void> {
   await nextTick()
   await new Promise((resolve) => setTimeout(resolve, 0))
   await nextTick()
 }
 
-describe('readonly state', () => {
+describe('text mode', () => {
   it('renders the default slot in edit mode', async () => {
     const { wrapper } = mountItem({
-      readonly: false,
+      text: false,
       model: { name: 'Vue' },
       itemProps: { prop: 'name' },
       slot: (model) => h(ElInput, { modelValue: model.name })
@@ -94,7 +99,7 @@ describe('readonly state', () => {
     expect(wrapper.find('.ep-field-view__content').exists()).toBe(false)
   })
 
-  it('inherits readonly from the parent form', async () => {
+  it('inherits text from the parent form', async () => {
     const { wrapper } = mountItem({
       model: { name: 'Vue' },
       itemProps: { prop: 'name' },
@@ -105,20 +110,35 @@ describe('readonly state', () => {
     expect(content(wrapper)).toBe('Vue')
   })
 
-  it('lets the readonly prop override the form', async () => {
+  it('does not enter text mode for el-form readonly', async () => {
+    const { wrapper } = mountItem({
+      text: false,
+      model: { name: 'Vue' },
+      itemProps: { prop: 'name' },
+      formProps: { readonly: true },
+      slot: (model) => h(ElInput, { modelValue: model.name })
+    })
+    await nextTick()
+    // 中文：Element Plus 原生 readonly 与文本模式相互独立。
+    // English: Native readonly is independent from text mode.
+    expect(wrapper.find('input').exists()).toBe(true)
+    expect(wrapper.find('.ep-field-view__content').exists()).toBe(false)
+  })
+
+  it('lets the text prop override the form', async () => {
     const { wrapper } = mountItem({
       model: { name: 'Vue' },
-      itemProps: { prop: 'name', readonly: false },
+      itemProps: { prop: 'name', text: false },
       slot: (model) => h(ElInput, { modelValue: model.name })
     })
     await nextTick()
     expect(wrapper.find('input').exists()).toBe(true)
   })
 
-  it('reacts when the form readonly attribute changes', async () => {
-    const readonly = ref(true)
+  it('reacts when the form text attribute changes', async () => {
+    const text = ref(true)
     const { wrapper } = mountItem({
-      readonly,
+      text,
       model: { name: 'Vue' },
       itemProps: { prop: 'name' },
       slot: (model) => h(ElInput, { modelValue: model.name })
@@ -126,11 +146,11 @@ describe('readonly state', () => {
     await nextTick()
     expect(wrapper.find('input').exists()).toBe(false)
 
-    readonly.value = false
+    text.value = false
     await settle()
     expect(wrapper.find('input').exists()).toBe(true)
 
-    readonly.value = true
+    text.value = true
     await settle()
     expect(content(wrapper)).toBe('Vue')
   })
@@ -175,7 +195,7 @@ describe('value resolution', () => {
       itemProps: { prop: 'tags' }
     })
     await nextTick()
-    expect(content(wrapper)).toBe('a,b,c')
+    expect(content(wrapper)).toBe('a;b;c')
   })
 
   it('supports an explicit emptyText', async () => {
@@ -220,7 +240,7 @@ describe('value formatters', () => {
         )
     })
     await nextTick()
-    expect(content(wrapper)).toBe('北京,上海')
+    expect(content(wrapper)).toBe('北京;上海')
   })
 
   it('resolves radio and checkbox labels', async () => {
@@ -255,7 +275,7 @@ describe('value formatters', () => {
         )
     })
     await nextTick()
-    expect(content(checkbox.wrapper)).toBe('选项 X,选项 Y')
+    expect(content(checkbox.wrapper)).toBe('选项 X;选项 Y')
   })
 
   it('resolves cascader label paths', async () => {
@@ -347,7 +367,7 @@ describe('value formatters', () => {
         })
     })
     await nextTick()
-    expect(content(wrapper)).toBe('成员 1,成员 3')
+    expect(content(wrapper)).toBe('成员 1;成员 3')
   })
 
   it('uses a custom formatter and falls back to emptyText for null', async () => {
@@ -421,8 +441,8 @@ describe('component display extensions', () => {
         )
     })
     await nextTick()
-    // Element Plus shows the option's `label` in the select input, not the
-    // dropdown-only label slot, so the read-only value must match the label.
+    // 中文：el-select 输入框显示 option label，而不是仅用于下拉的 #label。
+    // English: The select input shows the option label, not the dropdown #label.
     expect(content(wrapper)).toBe('北京')
   })
 
@@ -461,7 +481,26 @@ describe('component display extensions', () => {
     })
     await nextTick()
     expect(wrapper.findAll('.rich-label').length).toBe(2)
-    expect(content(wrapper)).toBe('★北京,★上海')
+    expect(content(wrapper)).toBe('★北京;★上海')
+  })
+
+  it('renders score text by default and el-rate in rate mode', async () => {
+    const text = mountItem({
+      model: { score: 4 },
+      itemProps: { prop: 'score' },
+      slot: (model) => h(ElRate, { modelValue: model.score })
+    })
+    await nextTick()
+    expect(content(text.wrapper)).toBe('4')
+
+    const rate = mountItem({
+      model: { score: 4 },
+      itemProps: { prop: 'score', rateMode: 'rate' },
+      slot: (model) => h(ElRate, { modelValue: model.score })
+    })
+    await nextTick()
+    expect(rate.wrapper.find('.el-rate').exists()).toBe(true)
+    expect(rate.wrapper.findComponent(ElRate).props('disabled')).toBe(true)
   })
 
   it('renders radio custom content as VNodes', async () => {
@@ -539,7 +578,7 @@ describe('global configuration and theming', () => {
     const root = wrapper.find('.ep-field-view')
     expect(root.classes()).toContain('ep-field-view--theme-brand')
     expect(root.classes()).toContain('ep-field-view--nowrap')
-    expect(root.classes()).toContain('ep-field-view--readonly')
+    expect(root.classes()).toContain('ep-field-view--text')
   })
 
   it('uses the global theme when no prop is given', async () => {
@@ -554,14 +593,14 @@ describe('global configuration and theming', () => {
 })
 
 describe('slots and validation', () => {
-  it('renders the readonly slot with its scope', async () => {
+  it('renders the text slot with its scope', async () => {
     const { wrapper } = mountItem({
       model: { value: 'abc' },
       itemProps: { prop: 'value' },
-      readonlySlot: (scope) => h('em', { class: 'custom-readonly' }, `自定义:${scope.text}`)
+      textSlot: (scope) => h('em', { class: 'custom-text' }, `自定义:${scope.text}`)
     })
     await nextTick()
-    expect(wrapper.find('.custom-readonly').text()).toBe('自定义:abc')
+    expect(wrapper.find('.custom-text').text()).toBe('自定义:abc')
     expect(wrapper.find('.ep-field-view__content').exists()).toBe(false)
   })
 
@@ -575,8 +614,8 @@ describe('slots and validation', () => {
     expect(wrapper.find('.custom-label').text()).toBe('自定义标签')
   })
 
-  it('skips validation while readonly and restores it in edit mode', async () => {
-    const readonly = ref(true)
+  it('skips validation in text mode and restores it in edit mode', async () => {
+    const text = ref(true)
     const model = reactive({ name: '' })
     const formRef = ref<FormInstance>()
     const rules: FormRules = {
@@ -587,10 +626,10 @@ describe('slots and validation', () => {
       name: 'ValidationHost',
       setup() {
         return () =>
-          h(ElForm, { ref: formRef, model, rules, readonly: readonly.value } as Record<string, unknown>, {
+          h(ElForm, { ref: formRef, model, rules, text: text.value } as Record<string, unknown>, {
             default: () =>
               h(
-                ReadonlyFormItem,
+                TextFormItem,
                 { prop: 'name', label: '名称' },
                 {
                   default: () => h(ElInput, { modelValue: model.name })
@@ -606,7 +645,7 @@ describe('slots and validation', () => {
     expect((formRef.value as unknown as { fields: unknown[] }).fields.length).toBe(0)
     expect(wrapper.find('.el-form-item').classes()).not.toContain('is-required')
 
-    readonly.value = false
+    text.value = false
     await settle()
     expect(wrapper.find('.el-form-item').classes()).toContain('is-required')
     const fields = (formRef.value as unknown as { fields: Array<{ propString: string }> }).fields

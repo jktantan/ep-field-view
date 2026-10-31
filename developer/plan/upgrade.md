@@ -12,7 +12,7 @@
 | TypeScript           | `>= 5.0`（开发使用 6.x）     | `vue-tsc`         |
 | 包管理器             | pnpm 10+（仓库使用 pnpm 12） | CI                |
 
-Element Plus 的 `el-form` 没有声明 `readonly` prop，本组件通过 fallthrough attribute + `MutationObserver` 读取，因此 **Element Plus 未来若正式声明 `readonly` prop，需要同步调整读取方式**。这是升级时最重要的检查点。
+Element Plus 的 `el-form` 没有声明 `text` prop，本组件通过 fallthrough attribute + `MutationObserver` 读取，因此 **Element Plus 未来若正式声明 `text` prop，需要同步调整读取方式**。这是升级时最重要的检查点。
 
 ## 升级节奏
 
@@ -43,8 +43,8 @@ Element Plus 的 `el-form` 没有声明 `readonly` prop，本组件通过 fallth
    pnpm pack --dry-run
    ```
 5. **回归重点**：
-   - `el-form readonly` 的动态切换（`MutationObserver`）；
-   - 只读字段注册/注销与校验恢复；
+   - `el-form text` 的动态切换（`MutationObserver`）；
+   - 文本模式字段注册/注销与校验恢复；
    - `el-select` / `el-radio` / `el-checkbox` / `el-cascader` / `el-date-picker` / `el-time-picker` / `el-transfer` 的 VNode 名称与 props；
    - 日期默认格式映射；
    - 表格内 `nowrap` 与间距。

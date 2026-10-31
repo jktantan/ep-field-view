@@ -1,11 +1,7 @@
 <template>
-  <ElFormItem
-    :key="isReadonly ? 'ep-field-view-readonly' : 'ep-field-view-edit'"
-    ref="formItemRef"
-    v-bind="formItemProps"
-  >
-    <template v-if="isReadonly">
-      <slot name="readonly" :value="currentValue" :text="displayText" :options="resolvedOptions" :empty="isEmpty">
+  <ElFormItem :key="isText ? 'ep-field-view-text' : 'ep-field-view-edit'" ref="formItemRef" v-bind="formItemProps">
+    <template v-if="isText">
+      <slot name="text" :value="currentValue" :text="displayText" :options="resolvedOptions" :empty="isEmpty">
         <span
           class="ep-field-view__content"
           :class="[contentClass, { 'ep-field-view__content--empty': isEmpty }]"
@@ -40,24 +36,25 @@ import {
 import type { ComponentInternalInstance } from 'vue'
 import { ElFormItem, formContextKey } from 'element-plus'
 import type { FormContext, FormItemInstance } from 'element-plus'
-import { CAPTURED_COMPONENTS, DEFAULT_CONFIG, DEFAULT_OPTION_PROPS } from '../constants'
+import { DEFAULT_CONFIG, DEFAULT_OPTION_PROPS } from '../constants'
 import { EP_FIELD_VIEW_CONFIG_KEY } from '../config'
-import type { EpFieldViewConfig, FieldViewOption, FieldViewOptionProps, ReadonlyFormItemProps } from '../types'
-import { extractOptions, formatFieldValue, resolveCustomDisplay } from '../utils/format'
-import type { FormatContext } from '../utils/format'
-import { observeFormReadonly, readFormReadonly } from '../utils/form-readonly'
+import type { EpFieldViewConfig, FieldViewOption, FieldViewOptionProps, TextFormItemProps } from '../types'
+import { CAPTURED_COMPONENTS, extractOptions, formatFieldValue, resolveCustomDisplay } from '../formatters'
+import type { FormatContext } from '../formatters/types'
+import { observeFormText, readFormText } from '../utils/form-text'
 import { isEmptyValue, getByPath } from '../utils/value'
 import { findComponentVNode, getComponentName } from '../utils/vnode'
 
 defineOptions({
-  name: 'ReadonlyFormItem'
+  name: 'TextFormItem'
 })
 
-const props = withDefaults(defineProps<ReadonlyFormItemProps>(), {
-  // Vue casts an absent Boolean prop to `false`. Keeping these `undefined`
-  // lets the component distinguish "not set" from an explicit `false`, which
-  // is required for inheriting `readonly` from the parent form.
-  readonly: undefined,
+const props = withDefaults(defineProps<TextFormItemProps>(), {
+  // 中文：Vue 会把未传的 Boolean prop 转为 false；保持 undefined 才能区分
+  // “未传”和显式 false，从而正确继承父级表单的 text 状态。
+  // English: Vue casts an absent Boolean prop to false. Keeping it undefined
+  // distinguishes "not set" from explicit false when inheriting form text.
+  text: undefined,
   nowrap: undefined,
   skipValidation: undefined,
   includeAffixes: undefined
@@ -71,19 +68,25 @@ const globalConfig = inject<EpFieldViewConfig>(EP_FIELD_VIEW_CONFIG_KEY, DEFAULT
 
 const formItemRef = ref<FormItemInstance>()
 
-/** Slots forwarded to the underlying `ElFormItem` (`label`, `error`, ...). */
+/**
+ * 中文：转发给内部 `ElFormItem` 的插槽（`label`、`error` 等）。
+ *
+ * English: Slots forwarded to the underlying `ElFormItem`.
+ */
 const forwardedSlots = computed(() => {
   const result: Record<string, unknown> = {}
   for (const [name, slot] of Object.entries(slots)) {
-    if (name !== 'default' && name !== 'readonly') result[name] = slot
+    if (name !== 'default' && name !== 'text') result[name] = slot
   }
   return result
 })
 
 /**
- * Slot VNodes are not reactive. Bumping a revision on every update keeps the
- * computed formatters in sync with option changes in the parent (for example
- * asynchronously loaded select options) without any polling.
+ * 中文：插槽 VNode 不是响应式的。每次更新递增 revision，让格式化 computed
+ * 能感知父组件的选项变化（例如异步加载的下拉选项），无需轮询。
+ *
+ * English: Slot VNodes are not reactive. Bumping a revision on every update
+ * keeps computed formatters in sync with parent option changes without polling.
  */
 const revision = shallowRef(0)
 onBeforeUpdate(() => {
@@ -106,10 +109,16 @@ const timeFormat = computed(() => setting('timeFormat', props.timeFormat))
 const theme = computed(() => setting('theme', props.theme))
 const shouldSkipValidation = computed(() => setting('skipValidation', props.skipValidation))
 const includeAffixes = computed(() => setting('includeAffixes', props.includeAffixes))
+const rateMode = computed(() => setting('rateMode', props.rateMode))
 
-/** Matches the size of the surrounding form / form item so the read-only text scales with it. */
+/**
+ * 中文：匹配父级表单 / 表单项的尺寸，让文本内容同步缩放。
+ *
+ * English: Match the surrounding form / form-item size so text scales with it.
+ */
 const size = computed<'large' | 'default' | 'small'>(() => {
-  // `attrs` is not reactive; reading the revision refreshes an overridden size.
+  // 中文：attrs 非响应式，读取 revision 以刷新单字段 size 覆盖。
+  // English: attrs is not reactive; reading revision refreshes an overridden size.
   void revision.value
   const attrSize = attrs.size
   const raw = typeof attrSize === 'string' && attrSize ? attrSize : formContext?.size
@@ -134,7 +143,8 @@ const mergedConfig = computed<EpFieldViewConfig>(() => ({
   theme: theme.value,
   skipValidation: shouldSkipValidation.value,
   optionProps: optionProps.value,
-  includeAffixes: includeAffixes.value
+  includeAffixes: includeAffixes.value,
+  rateMode: rateMode.value
 }))
 
 function findParentForm(target: ComponentInternalInstance | null | undefined): ComponentInternalInstance | null {
@@ -150,17 +160,23 @@ function findParentForm(target: ComponentInternalInstance | null | undefined): C
 
 const parentForm = findParentForm(instance)
 
-/** `el-form` accepts `readonly` as a fallthrough attribute. Vue attrs are not
- * reactive, so a MutationObserver keeps the state in sync when the form's
- * read-only mode is toggled at runtime. */
-const formReadonly = ref(readFormReadonly(parentForm?.attrs))
+/**
+ * 中文：`el-form` 没有原生 `text` 模式，这里使用扩展属性 `text`（未声明为
+ * form prop，因此进入 attrs）。Vue attrs 非响应式，用 MutationObserver 保持
+ * 运行时同步。Element Plus 原生 `readonly` 是独立状态，刻意不用于触发文本模式。
+ *
+ * English: `el-form` has no native `text` mode, so we use an extension attribute
+ * (`text`) that lands in attrs. Attrs are not reactive, so a MutationObserver
+ * keeps it in sync. Native `readonly` is separate and deliberately not used.
+ */
+const formText = ref(readFormText(parentForm?.attrs))
 
 let stopObservingForm: (() => void) | undefined
 
 onMounted(() => {
-  formReadonly.value = readFormReadonly(parentForm?.attrs)
-  stopObservingForm = observeFormReadonly(parentForm?.proxy?.$el as Element | null | undefined, () => {
-    formReadonly.value = readFormReadonly(parentForm?.attrs)
+  formText.value = readFormText(parentForm?.attrs)
+  stopObservingForm = observeFormText(parentForm?.proxy?.$el as Element | null | undefined, () => {
+    formText.value = readFormText(parentForm?.attrs)
   })
 })
 
@@ -168,7 +184,7 @@ onBeforeUnmount(() => {
   stopObservingForm?.()
 })
 
-const isReadonly = computed(() => props.readonly ?? formReadonly.value)
+const isText = computed(() => props.text ?? formText.value)
 
 function findParentName(names: Set<string>): string | undefined {
   let current = instance?.parent ?? null
@@ -185,7 +201,8 @@ const isInTable = Boolean(findParentName(new Set(['ElTable', 'ElTableBody', 'ElT
 const nowrap = computed(() => props.nowrap ?? (isInTable && mergedConfig.value.nowrapInTable))
 
 const formVNode = computed(() => {
-  // Read the revision so the slot vnodes are re-inspected after a parent update.
+  // 中文：读取 revision，父组件更新后重新检查插槽 VNode。
+  // English: Read revision so slot VNodes are re-inspected after parent updates.
   void revision.value
   const defaultSlot = slots.default
   if (!defaultSlot) return null
@@ -193,7 +210,8 @@ const formVNode = computed(() => {
 })
 
 const hasValueProp = computed(() => {
-  // Depend on the value so an explicit `undefined` -> value transition is seen.
+  // 中文：依赖 value，以感知显式 undefined 到有值的变化。
+  // English: Depend on value so an explicit undefined -> value transition is seen.
   void props.value
   const vnodeProps = instance?.vnode.props
   return Boolean(vnodeProps && 'value' in vnodeProps)
@@ -212,7 +230,8 @@ const formatContext = computed<FormatContext>(() => ({
   dateFormat: dateFormat.value,
   timeFormat: timeFormat.value,
   optionProps: optionProps.value,
-  includeAffixes: includeAffixes.value
+  includeAffixes: includeAffixes.value,
+  rateMode: rateMode.value
 }))
 
 const displayText = computed(() => {
@@ -232,13 +251,16 @@ const displayText = computed(() => {
 })
 
 /**
- * Rich content provided by the component's own selected-value slots (for
- * example `el-select`'s `#label` or a radio's custom content). Rendering the
- * original VNodes keeps the read-only display identical to the component.
+ * 中文：组件自身选中值插槽提供的富内容（如 `el-select` 的 `#label`、radio
+ * 的自定义内容）。渲染原始 VNode，保证文本模式与组件最终显示一致。
+ *
+ * English: Rich content from the component's selected-value slots (for example
+ * `el-select`'s `#label`). Rendering the original VNodes keeps text mode
+ * identical to the component.
  */
 const customContent = computed(() => {
   void revision.value
-  if (props.formatter || !isReadonly.value) return undefined
+  if (props.formatter || !isText.value) return undefined
   return resolveCustomDisplay(currentValue.value, formVNode.value, formatContext.value)
 })
 
@@ -261,7 +283,7 @@ const formItemProps = computed<Record<string, unknown>>(() => {
   if (theme.value) classNames.push(`ep-field-view--theme-${theme.value}`)
   if (size.value !== 'default') classNames.push(`ep-field-view--size-${size.value}`)
   if (nowrap.value) classNames.push('ep-field-view--nowrap')
-  if (isReadonly.value) classNames.push('ep-field-view--readonly')
+  if (isText.value) classNames.push('ep-field-view--text')
   if (attrClass) classNames.push(attrClass)
 
   const result: Record<string, unknown> = { ...rest, class: classNames }
@@ -271,13 +293,13 @@ const formItemProps = computed<Record<string, unknown>>(() => {
     result.style = [attrStyle, { marginBottom: '0' }]
   }
 
-  const skip = isReadonly.value && shouldSkipValidation.value
+  const skip = isText.value && shouldSkipValidation.value
   if (props.prop && !skip) result.prop = props.prop
   else delete result.prop
 
   if (skip) {
-    // An empty `rules` array prevents both the item rules and the form rules
-    // from running, while keeping the item mounted when switching back.
+    // 中文：空 rules 数组阻止 item / form 规则运行，同时保持组件挂载。
+    // English: An empty rules array prevents item and form rules from running.
     result.rules = []
     result.required = false
   }
@@ -293,7 +315,7 @@ defineExpose({
   formItemRef,
   value: currentValue,
   displayText,
-  isReadonly,
+  isText,
   options: resolvedOptions
 })
 </script>

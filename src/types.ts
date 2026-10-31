@@ -1,7 +1,9 @@
 import type { InjectionKey, StyleValue } from 'vue'
 
 /**
- * A single option used by select-like components.
+ * 中文：一个选项对象，供选择类组件使用。
+ *
+ * English: A single option used by select-like components.
  */
 export interface FieldViewOption {
   label?: string | number
@@ -10,7 +12,9 @@ export interface FieldViewOption {
 }
 
 /**
- * Mapping between option object keys and the keys used by the component.
+ * 中文：选项对象字段与组件字段之间的映射。
+ *
+ * English: Mapping between option object keys and component keys.
  */
 export interface FieldViewOptionProps {
   label?: string
@@ -20,7 +24,9 @@ export interface FieldViewOptionProps {
 }
 
 /**
- * Context handed to a custom `formatter`.
+ * 中文：自定义 `formatter` 的上下文。
+ *
+ * English: Context handed to a custom `formatter`.
  */
 export interface FieldViewFormatterContext {
   prop?: string
@@ -30,10 +36,14 @@ export interface FieldViewFormatterContext {
 }
 
 /**
- * Customises how a value is rendered in read-only mode.
+ * 中文：文本模式下的自定义文本格式化函数。
  *
- * Return `null` or `undefined` to fall back to the configured `emptyText`.
- * For rich content (links, tags, images, ...) use the `readonly` slot instead.
+ * 返回 `null` 或 `undefined` 时回退到 `emptyText`；富内容请使用 `text` 插槽。
+ *
+ * English: Customises how a value is rendered in text mode.
+ *
+ * Return `null` or `undefined` to fall back to `emptyText`. For rich content
+ * (links, tags, images, ...) use the `text` slot instead.
  */
 export type FieldViewFormatter = (
   value: unknown,
@@ -41,79 +51,224 @@ export type FieldViewFormatter = (
 ) => string | number | null | undefined
 
 /**
- * Global configuration registered through `app.use(EpFieldView, options)`.
+ * 中文：评分的显示方式。`text` 显示分数，`rate` 渲染禁用状态的 `el-rate`。
+ *
+ * English: How `el-rate` is displayed. `text` shows the score, `rate` renders a
+ * disabled `el-rate` (preserving custom icons/images).
+ */
+export type RateMode = 'text' | 'rate'
+
+/**
+ * 中文：通过 `app.use(EpFieldView, options)` 注册的全局配置。
+ *
+ * English: Global configuration registered through `app.use(EpFieldView, options)`.
  */
 export interface EpFieldViewConfig {
-  /** Text shown for empty values. */
+  /**
+   * 中文：空值文案。
+   *
+   * English: Text shown for empty values.
+   */
   emptyText: string
-  /** Separator used when joining multiple values. */
+  /**
+   * 中文：多值分隔符，默认 `;`。
+   *
+   * English: Separator used when joining multiple values. Defaults to `;`.
+   */
   separator: string
-  /** Separator used for range values (date/time range, slider). */
+  /**
+   * 中文：范围值分隔符（日期/时间范围、滑块）。
+   *
+   * English: Separator used for range values (date/time range, slider).
+   */
   rangeSeparator: string
   /**
-   * Date format used by date pickers. When empty, the component's `format`
-   * prop or the built-in format for the picker type is used.
+   * 中文：日期格式；为空时使用组件的 `format` 或内置格式。
+   *
+   * English: Date format. When empty, the component's `format` prop or the
+   * built-in format for the picker type is used.
    */
   dateFormat: string
   /**
-   * Time format used by time pickers. When empty, the component's `format`
-   * prop or `HH:mm:ss` is used.
+   * 中文：时间格式；为空时使用组件的 `format` 或 `HH:mm:ss`。
+   *
+   * English: Time format. When empty, the component's `format` prop or
+   * `HH:mm:ss` is used.
    */
   timeFormat: string
-  /** Text used by switch components for the active state. */
+  /**
+   * 中文：开关激活状态文案。
+   *
+   * English: Text used by switch components for the active state.
+   */
   activeText: string
-  /** Text used by switch components for the inactive state. */
+  /**
+   * 中文：开关关闭状态文案。
+   *
+   * English: Text used by switch components for the inactive state.
+   */
   inactiveText: string
-  /** Built-in theme name (`compact`, `bold`) or a custom one. */
+  /**
+   * 中文：内置主题名（`compact`、`bold`）或自定义主题名。
+   *
+   * English: Built-in theme name (`compact`, `bold`) or a custom one.
+   */
   theme: string
-  /** Skip form validation while the item is read-only. */
+  /**
+   * 中文：文本模式是否跳过表单校验。
+   *
+   * English: Skip form validation while the item is in text mode.
+   */
   skipValidation: boolean
-  /** Truncate long content with an ellipsis when the item lives in a table. */
+  /**
+   * 中文：在表格内是否用省略号截断长内容。
+   *
+   * English: Truncate long content with an ellipsis inside a table.
+   */
   nowrapInTable: boolean
-  /** Key mapping used when reading option objects. */
+  /**
+   * 中文：读取选项对象时使用的字段映射。
+   *
+   * English: Key mapping used when reading option objects.
+   */
   optionProps: FieldViewOptionProps
-  /** Include text from input prefix/prepend/append/suffix slots. */
+  /**
+   * 中文：是否拼接输入框的 prefix/prepend/append/suffix 插槽文本。
+   *
+   * English: Include text from input prefix/prepend/append/suffix slots.
+   */
   includeAffixes: boolean
+  /**
+   * 中文：评分显示方式，默认 `text`。
+   *
+   * English: How `el-rate` is rendered in text mode.
+   */
+  rateMode: RateMode
 }
 
 export type EpFieldViewOptions = Partial<EpFieldViewConfig>
 
 /**
- * Props of `<ReadonlyFormItem>`.
+ * 中文：`<TextFormItem>` 的 props。
  *
- * Every other `el-form-item` prop (`label`, `label-width`, `required`,
- * `rules`, `error`, ...) is forwarded to the underlying `ElFormItem`, as are
- * its slots except `default` and `readonly`.
+ * Element Plus 原生有 `disabled` 与 `readonly`；本组件的 `text` 是第三种独立状态。
+ * 其他 `el-form-item` 属性与插槽（`label`、`error` 等）会原样透传。
+ *
+ * English: Props of `<TextFormItem>`.
+ *
+ * Element Plus has native `disabled` and `readonly`; this component's `text`
+ * mode is a third, independent state. Other `el-form-item` props and slots are
+ * forwarded unchanged.
  */
-export interface ReadonlyFormItemProps {
-  /** Field path in the parent form model. */
+export interface TextFormItemProps {
+  /**
+   * 中文：父级表单 model 中的字段路径。
+   *
+   * English: Field path in the parent form model.
+   */
   prop?: string
-  /** Explicit value. Takes precedence over the value read from the form model. */
+  /**
+   * 中文：显式值，优先于 model 中的值。
+   *
+   * English: Explicit value. Takes precedence over the form model.
+   */
   value?: unknown
-  /** Force read-only or editable mode. Falls back to the parent form's `readonly` attr. */
-  readonly?: boolean
+  /**
+   * 中文：文本模式；不传时继承父级 `el-form` 的 `text` 属性。
+   *
+   * English: Render as plain text. Falls back to the parent form's `text`
+   * attribute, then to `false` (edit mode).
+   */
+  text?: boolean
+  /**
+   * 中文：空值文案。
+   *
+   * English: Text shown for empty values.
+   */
   emptyText?: string
+  /**
+   * 中文：多值分隔符。
+   *
+   * English: Separator used when joining multiple values.
+   */
   separator?: string
+  /**
+   * 中文：范围值分隔符。
+   *
+   * English: Separator used for range values.
+   */
   rangeSeparator?: string
+  /**
+   * 中文：日期格式。
+   *
+   * English: Date format.
+   */
   dateFormat?: string
+  /**
+   * 中文：时间格式。
+   *
+   * English: Time format.
+   */
   timeFormat?: string
-  /** Custom formatter for the read-only value. */
+  /**
+   * 中文：自定义文本格式化函数。
+   *
+   * English: Custom formatter for the text value.
+   */
   formatter?: FieldViewFormatter
-  /** Explicit options, bypassing the options discovered in the default slot. */
+  /**
+   * 中文：显式选项，绕过插槽解析。
+   *
+   * English: Explicit options, bypassing the default slot.
+   */
   options?: FieldViewOption[]
-  /** Key mapping used when reading `options` objects. */
+  /**
+   * 中文：选项字段映射。
+   *
+   * English: Key mapping used when reading `options` objects.
+   */
   optionProps?: FieldViewOptionProps
-  /** Include text from input prefix/prepend/append/suffix slots. Defaults to `true`. */
+  /**
+   * 中文：是否拼接输入框前后缀插槽文本，默认 `true`。
+   *
+   * English: Include input affix slot text. Defaults to `true`.
+   */
   includeAffixes?: boolean
-  /** Truncate with an ellipsis. Defaults to `true` inside `el-table`. */
+  /**
+   * 中文：表格内是否单行省略。
+   *
+   * English: Truncate with an ellipsis. Defaults to `true` inside `el-table`.
+   */
   nowrap?: boolean
-  /** Skip validation while read-only. Defaults to `true`. */
+  /**
+   * 中文：文本模式是否跳过校验，默认 `true`。
+   *
+   * English: Skip validation in text mode. Defaults to `true`.
+   */
   skipValidation?: boolean
-  /** Theme name appended as `ep-field-view--theme-{name}`. */
+  /**
+   * 中文：评分显示方式，默认 `text`。
+   *
+   * English: How `el-rate` is rendered in text mode. Defaults to `text`.
+   */
+  rateMode?: RateMode
+  /**
+   * 中文：主题名，添加 `ep-field-view--theme-{name}` 类。
+   *
+   * English: Theme name appended as `ep-field-view--theme-{name}`.
+   */
   theme?: string
-  /** Extra class applied to the read-only content element. */
+  /**
+   * 中文：文本内容元素的额外类名。
+   *
+   * English: Extra class applied to the text content element.
+   */
   contentClass?: string | string[] | Record<string, boolean>
-  /** Inline style applied to the read-only content element. */
+  /**
+   * 中文：文本内容元素的内联样式。
+   *
+   * English: Inline style applied to the text content element.
+   */
   contentStyle?: StyleValue
 }
 
