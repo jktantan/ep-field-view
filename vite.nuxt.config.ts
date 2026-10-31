@@ -14,6 +14,9 @@ export default defineConfig({
     target: 'es2022',
     emptyOutDir: false,
     minify: false,
+    // 中文：发布包不生成 sourcemap。
+    // English: Do not emit sourcemaps in the published package.
+    sourcemap: false,
     lib: {
       entry: resolve(import.meta.dirname, 'src/nuxt.ts'),
       formats: ['es'],

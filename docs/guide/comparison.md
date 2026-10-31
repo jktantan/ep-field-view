@@ -63,7 +63,7 @@ Element Plus 的表单字段已经有原生的 `disabled` 与 `readonly` 状态�
 | 尺寸           | 无                                       | 跟随 `el-form` / `el-form-item` 的 `size`，与 Element Plus 字号一致 |
 | 类型           | 手写 `index.d.ts`                        | 源码 TypeScript + 自动生成 d.ts                                     |
 | 依赖           | `dayjs` + `default-passive-events`       | 仅 `dayjs`                                                          |
-| 构建           | Vite 4                                   | Vite 8，ESM / UMD / CSS / sourcemap                                 |
+| 构建           | Vite 4                                   | Vite 8，ESM / UMD / CSS                                             |
 
 ## 行为差异
 

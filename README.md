@@ -34,7 +34,7 @@ Element Plus 的表单字段有三种相互独立的状态：
 - **多值分隔符可配**：默认 `;`，可按语言或产品规范覆盖。
 - **评分显示可配**：默认分数文本，`rateMode="rate"` 渲染禁用状态的 `el-rate`，保留自定义图标/图片。
 - **主题化**：CSS 变量、内置主题、自定义主题类、暗色模式，默认跟随 Element Plus 变量。
-- **TypeScript**：完整类型与 d.ts，ESM / UMD / CSS / sourcemap。
+- **TypeScript**：完整类型与 d.ts，ESM / UMD / CSS。
 - **表格友好**：`el-table` 内自动去除间距并单行省略。
 
 ## 安装

@@ -41,7 +41,7 @@ dist/components/...
 ```
 
 `package.json` 的 `files` 已限制为 `dist`、`README.md`、`LICENSE`、`NOTICE`；
-其中 `!dist/**/*.map` 在发布时排除 sourcemap（本地构建仍会生成，便于调试），避免把 `src` 源码随 `sourcesContent` 发到 npm。
+构建不生成 sourcemap，发布包中不会出现 `.map` 文件，也不会通过 `sourcesContent` 泄漏 `src` 源码。
 
 ## 发布流程
 

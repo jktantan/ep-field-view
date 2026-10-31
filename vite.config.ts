@@ -17,13 +17,16 @@ export default defineConfig({
     target: 'es2018',
     minify: 'terser',
     terserOptions: {
-      // 中文：多轮压缩可进一步减小体积；注释与调试信息由 sourcemap 提供。
-      // English: Extra passes shrink the bundle further; comments and debug
-      // information remain available through sourcemaps.
+      // 中文：多轮压缩可进一步减小体积；注释会全部移除。
+      // English: Extra passes shrink the bundle further; all comments are
+      // removed.
       compress: { passes: 3 },
       format: { comments: false }
     },
-    sourcemap: true,
+    // 中文：发布包不生成 sourcemap，避免源码随 sourcesContent 泄漏并减小体积。
+    // English: Never emit sourcemaps in the published package, so source code
+    // is not exposed through `sourcesContent` and the tarball stays small.
+    sourcemap: false,
     emptyOutDir: true,
     lib: {
       entry: resolve(import.meta.dirname, 'src/index.ts'),
