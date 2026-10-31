@@ -40,7 +40,8 @@ dist/style.css
 dist/components/...
 ```
 
-`package.json` 的 `files` 已限制为 `dist`、`README.md`、`LICENSE`、`NOTICE`。
+`package.json` 的 `files` 已限制为 `dist`、`README.md`、`LICENSE`、`NOTICE`；
+其中 `!dist/**/*.map` 在发布时排除 sourcemap（本地构建仍会生成，便于调试），避免把 `src` 源码随 `sourcesContent` 发到 npm。
 
 ## 发布流程
 
