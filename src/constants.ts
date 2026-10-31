@@ -32,7 +32,8 @@ export const DEFAULT_CONFIG: EpFieldViewConfig = {
   optionProps: { ...DEFAULT_OPTION_PROPS },
   includeAffixes: true,
   rateMode: 'text',
-  inputTagMode: 'text'
+  inputTagMode: 'text',
+  imageMode: 'text'
 }
 
 /**

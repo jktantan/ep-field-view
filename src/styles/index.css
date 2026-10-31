@@ -1,16 +1,38 @@
 .ep-field-view {
-  --ep-field-view-color: var(--el-text-color-regular);
-  --ep-field-view-empty-color: var(--el-text-color-placeholder);
-  --ep-field-view-font-size: var(--el-font-size-base);
+  /* 中文：Element Plus 变量来源。`el-config-provider` 使用自定义 namespace 时，
+     组件会通过内联样式把这些来源变量指向 `--{namespace}-*`。
+     English: Element Plus variable sources. With a custom `el-config-provider`
+     namespace, these are redirected to `--{namespace}-*` through inline styles. */
+  --ep-field-view-source-color: var(--el-text-color-regular);
+  --ep-field-view-source-empty-color: var(--el-text-color-placeholder);
+  --ep-field-view-source-font-size: var(--el-font-size-base);
+  --ep-field-view-source-font-size-small: var(--el-font-size-small);
+  --ep-field-view-source-font-size-extra-small: var(--el-font-size-extra-small);
+  --ep-field-view-source-component-size: var(--el-component-size);
+  --ep-field-view-source-component-size-large: var(--el-component-size-large);
+  --ep-field-view-source-component-size-small: var(--el-component-size-small);
+  --ep-field-view-source-text-color-primary: var(--el-text-color-primary);
+  --ep-field-view-source-text-color-secondary: var(--el-text-color-secondary);
+  --ep-field-view-source-text-color-disabled: var(--el-text-color-disabled);
+  --ep-field-view-source-fill-color-light: var(--el-fill-color-light);
+  --ep-field-view-source-border-color-lighter: var(--el-border-color-lighter);
+  --ep-field-view-color: var(--ep-field-view-source-color);
+  --ep-field-view-empty-color: var(--ep-field-view-source-empty-color);
+  --ep-field-view-font-size: var(--ep-field-view-source-font-size);
   --ep-field-view-font-weight: 400;
   --ep-field-view-line-height: 1.6;
   --ep-field-view-word-break: break-all;
   --ep-field-view-content-width: 100%;
-  --ep-field-view-min-height: var(--el-component-size);
+  --ep-field-view-min-height: var(--ep-field-view-source-component-size);
   --ep-field-view-tag-gap: 6px;
+  --ep-field-view-image-size: 64px;
+  --ep-field-view-image-radius: 4px;
 }
 
-.ep-field-view .el-form-item__content {
+/* 中文：使用类名后缀匹配 Element Plus 的 form-item 元素，兼容自定义 namespace。
+   English: Match Element Plus form-item elements by class suffix so custom
+   namespaces keep working. */
+.ep-field-view [class*='-form-item__content'] {
   min-height: var(--ep-field-view-min-height);
   align-items: center;
 }
@@ -18,12 +40,12 @@
 /* 中文：Element Plus 仅 small 缩小字号，default / large 使用基础字号。
    English: Only `small` shrinks the font; `default` and `large` use the base size. */
 .ep-field-view--size-large {
-  --ep-field-view-min-height: var(--el-component-size-large);
+  --ep-field-view-min-height: var(--ep-field-view-source-component-size-large);
 }
 
 .ep-field-view--size-small {
-  --ep-field-view-font-size: var(--el-font-size-extra-small);
-  --ep-field-view-min-height: var(--el-component-size-small);
+  --ep-field-view-font-size: var(--ep-field-view-source-font-size-extra-small);
+  --ep-field-view-min-height: var(--ep-field-view-source-component-size-small);
   --ep-field-view-tag-gap: 4px;
 }
 
@@ -58,9 +80,33 @@
   color: var(--ep-field-view-empty-color);
 }
 
+/* 中文：`imageMode: 'image'` 的图片容器与缩略图尺寸。
+   English: Image container and thumbnail size for `imageMode: 'image'`. */
+.ep-field-view__images {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--ep-field-view-tag-gap);
+  align-items: center;
+  vertical-align: middle;
+}
+
+.ep-field-view__image {
+  width: var(--ep-field-view-image-size);
+  height: var(--ep-field-view-image-size);
+  overflow: hidden;
+  border-radius: var(--ep-field-view-image-radius);
+}
+
+/* 中文：评分样式复用 disabled `el-rate`，彻底移除指针交互与焦点。
+   English: The rate style reuses a disabled `el-rate`; remove pointer
+   interaction and focus entirely. */
+.ep-field-view__rate {
+  pointer-events: none;
+}
+
 /* 中文：表格单元格保持紧凑并截断长内容。
    English: Keep table rows compact and truncate long content. */
-.ep-field-view--nowrap .el-form-item__content {
+.ep-field-view--nowrap [class*='-form-item__content'] {
   min-height: auto;
 }
 
@@ -73,23 +119,47 @@
   overflow-wrap: normal;
 }
 
+/* 中文：`JsonPreview` 的结构化展示，等宽字体并保留缩进。
+   English: Structured `JsonPreview` output with a monospace font and preserved
+   indentation. */
+.ep-field-view__json {
+  box-sizing: border-box;
+  max-width: 100%;
+  padding: 8px 10px;
+  margin: 0;
+  overflow: auto;
+  font-family: var(--ep-field-view-json-font-family, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace);
+  font-size: var(--ep-field-view-json-font-size, 12px);
+  line-height: 1.5;
+  color: var(--ep-field-view-color);
+  white-space: pre;
+  word-break: normal;
+  background: var(--ep-field-view-json-bg, var(--ep-field-view-source-fill-color-light));
+  border: 1px solid var(--ep-field-view-json-border-color, var(--ep-field-view-source-border-color-lighter));
+  border-radius: var(--ep-field-view-json-radius, 4px);
+}
+
+.ep-field-view__json-empty {
+  color: var(--ep-field-view-empty-color);
+}
+
 /* 中文：内置主题，宿主可通过 `theme="my-theme"` 自定义。
    English: Built-in themes; hosts can add their own via `theme`. */
 .ep-field-view--theme-compact {
-  --ep-field-view-font-size: var(--el-font-size-small);
+  --ep-field-view-font-size: var(--ep-field-view-source-font-size-small);
   --ep-field-view-line-height: 1.4;
 }
 
-.ep-field-view--theme-compact .el-form-item__label {
-  font-size: var(--el-font-size-small);
+.ep-field-view--theme-compact [class*='-form-item__label'] {
+  font-size: var(--ep-field-view-source-font-size-small);
 }
 
 .ep-field-view--theme-bold {
   --ep-field-view-font-weight: 600;
-  --ep-field-view-color: var(--el-text-color-primary);
+  --ep-field-view-color: var(--ep-field-view-source-text-color-primary);
 }
 
 .ep-field-view--theme-plain {
-  --ep-field-view-color: var(--el-text-color-secondary);
-  --ep-field-view-empty-color: var(--el-text-color-disabled);
+  --ep-field-view-color: var(--ep-field-view-source-text-color-secondary);
+  --ep-field-view-empty-color: var(--ep-field-view-source-text-color-disabled);
 }

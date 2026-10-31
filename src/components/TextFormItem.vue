@@ -33,13 +33,19 @@ import {
   useAttrs,
   useSlots
 } from 'vue'
-import type { ComponentInternalInstance } from 'vue'
-import { ElFormItem, formContextKey } from 'element-plus'
+import type { ComponentInternalInstance, Ref } from 'vue'
+import { ElFormItem, formContextKey, namespaceContextKey } from 'element-plus'
 import type { FormContext, FormItemInstance } from 'element-plus'
 import { DEFAULT_CONFIG, DEFAULT_OPTION_PROPS } from '../constants'
 import { EP_FIELD_VIEW_CONFIG_KEY } from '../config'
 import type { EpFieldViewConfig, FieldViewOption, FieldViewOptionProps, TextFormItemProps } from '../types'
-import { CAPTURED_COMPONENTS, extractOptions, formatFieldValue, resolveCustomDisplay } from '../formatters'
+import {
+  CAPTURED_COMPONENTS,
+  extractOptions,
+  formatFieldValue,
+  resolveComponentFallbackValue,
+  resolveCustomDisplay
+} from '../formatters'
 import type { FormatContext } from '../formatters/types'
 import { observeFormText, readFormText } from '../utils/form-text'
 import { isEmptyValue, getByPath } from '../utils/value'
@@ -65,6 +71,60 @@ const attrs = useAttrs()
 const slots = useSlots()
 const formContext = inject<FormContext | undefined>(formContextKey, undefined)
 const globalConfig = inject<EpFieldViewConfig>(EP_FIELD_VIEW_CONFIG_KEY, DEFAULT_CONFIG)
+const namespaceRef = inject<Ref<string> | undefined>(namespaceContextKey, undefined)
+
+/**
+ * 中文：Nuxt/Nitro 可能将本包外置、同时把 Element Plus 内联，导致
+ * `formContextKey` 出现两个 Symbol 实例，`inject` 拿不到 `el-form` 上下文。
+ * 这里同时保留父级 `ElForm` 实例作为兜底，直接从 props 读取 model / size。
+ *
+ * English: Nuxt/Nitro can externalize this package while inlining Element Plus,
+ * producing two `formContextKey` symbols so `inject` misses the `el-form`
+ * context. Keep the parent `ElForm` instance as a fallback and read model/size
+ * from its props.
+ */
+const parentForm = findParentForm(instance)
+
+function parentFormProp<T>(name: string): T | undefined {
+  return (parentForm?.props as Record<string, unknown> | undefined)?.[name] as T | undefined
+}
+
+/**
+ * 中文：`el-config-provider` 的 namespace 会改变 Element Plus 的类名与 CSS
+ * 变量前缀。这里把组件使用的变量来源重定向到 `--{namespace}-*`，CSS 侧则用
+ * 类名后缀选择器匹配 form-item 元素，二者配合即可在自定义命名空间下工作。
+ *
+ * English: `el-config-provider`'s namespace changes Element Plus class names
+ * and CSS variable prefixes. These sources are redirected to `--{namespace}-*`;
+ * the CSS matches form-item elements by class suffix, so custom namespaces work.
+ */
+const NAMESPACE_SOURCE_VARIABLES: Record<string, string> = {
+  '--ep-field-view-source-color': 'text-color-regular',
+  '--ep-field-view-source-empty-color': 'text-color-placeholder',
+  '--ep-field-view-source-font-size': 'font-size-base',
+  '--ep-field-view-source-font-size-small': 'font-size-small',
+  '--ep-field-view-source-font-size-extra-small': 'font-size-extra-small',
+  '--ep-field-view-source-component-size': 'component-size',
+  '--ep-field-view-source-component-size-large': 'component-size-large',
+  '--ep-field-view-source-component-size-small': 'component-size-small',
+  '--ep-field-view-source-text-color-primary': 'text-color-primary',
+  '--ep-field-view-source-text-color-secondary': 'text-color-secondary',
+  '--ep-field-view-source-text-color-disabled': 'text-color-disabled',
+  '--ep-field-view-source-fill-color-light': 'fill-color-light',
+  '--ep-field-view-source-border-color-lighter': 'border-color-lighter'
+}
+
+const namespaceStyle = computed<Record<string, string> | undefined>(() => {
+  const namespace = namespaceRef?.value || 'el'
+  if (namespace === 'el') return undefined
+  const style: Record<string, string> = {}
+  for (const [name, token] of Object.entries(NAMESPACE_SOURCE_VARIABLES)) {
+    // 中文：回退到 `--el-*`，兼容只改类名、未重新编译主题变量的项目。
+    // English: Fall back to `--el-*` for projects that only rename classes.
+    style[name] = `var(--${namespace}-${token}, var(--el-${token}))`
+  }
+  return style
+})
 
 const formItemRef = ref<FormItemInstance>()
 
@@ -111,6 +171,7 @@ const shouldSkipValidation = computed(() => setting('skipValidation', props.skip
 const includeAffixes = computed(() => setting('includeAffixes', props.includeAffixes))
 const rateMode = computed(() => setting('rateMode', props.rateMode))
 const inputTagMode = computed(() => setting('inputTagMode', props.inputTagMode))
+const imageMode = computed(() => setting('imageMode', props.imageMode))
 
 /**
  * 中文：匹配父级表单 / 表单项的尺寸，让文本内容同步缩放。
@@ -122,7 +183,8 @@ const size = computed<'large' | 'default' | 'small'>(() => {
   // English: attrs is not reactive; reading revision refreshes an overridden size.
   void revision.value
   const attrSize = attrs.size
-  const raw = typeof attrSize === 'string' && attrSize ? attrSize : formContext?.size
+  const raw =
+    typeof attrSize === 'string' && attrSize ? attrSize : (formContext?.size ?? parentFormProp<string>('size'))
   if (raw === 'large' || raw === 'small') return raw
   return 'default'
 })
@@ -146,7 +208,8 @@ const mergedConfig = computed<EpFieldViewConfig>(() => ({
   optionProps: optionProps.value,
   includeAffixes: includeAffixes.value,
   rateMode: rateMode.value,
-  inputTagMode: inputTagMode.value
+  inputTagMode: inputTagMode.value,
+  imageMode: imageMode.value
 }))
 
 function findParentForm(target: ComponentInternalInstance | null | undefined): ComponentInternalInstance | null {
@@ -159,8 +222,6 @@ function findParentForm(target: ComponentInternalInstance | null | undefined): C
   }
   return null
 }
-
-const parentForm = findParentForm(instance)
 
 /**
  * 中文：`el-form` 没有原生 `text` 模式，这里使用扩展属性 `text`（未声明为
@@ -219,7 +280,24 @@ const hasValueProp = computed(() => {
   return Boolean(vnodeProps && 'value' in vnodeProps)
 })
 
-const currentValue = computed(() => (hasValueProp.value ? props.value : getByPath(formContext?.model, props.prop)))
+/**
+ * 中文：优先使用 `el-form` 的注入上下文；在 Nuxt SSR 等外置场景下回退到
+ * 父级 `ElForm` 实例的 `model` prop。
+ *
+ * English: Prefer the injected `el-form` context; fall back to the parent
+ * `ElForm` instance's `model` prop when externalized (Nuxt SSR).
+ */
+const formModel = computed(() => formContext?.model ?? parentFormProp<unknown>('model'))
+
+const currentValue = computed(() => {
+  const raw = hasValueProp.value ? props.value : getByPath(formModel.value, props.prop)
+  if (!isEmptyValue(raw)) return raw
+  // 中文：上传文件列表与图片地址通常不在 model 中，回退到组件自身 props。
+  // English: Upload file lists and image sources often live outside the model,
+  // so fall back to the component's own props.
+  const fallback = resolveComponentFallbackValue(formVNode.value)
+  return isEmptyValue(fallback) ? raw : fallback
+})
 
 const resolvedOptions = computed<FieldViewOption[]>(() =>
   props.options ? props.options : extractOptions(formVNode.value, optionProps.value)
@@ -234,7 +312,8 @@ const formatContext = computed<FormatContext>(() => ({
   optionProps: optionProps.value,
   includeAffixes: includeAffixes.value,
   rateMode: rateMode.value,
-  inputTagMode: inputTagMode.value
+  inputTagMode: inputTagMode.value,
+  imageMode: imageMode.value
 }))
 
 const displayText = computed(() => {
@@ -245,7 +324,8 @@ const displayText = computed(() => {
       prop: props.prop,
       value,
       componentName: getComponentName(vnode),
-      options: resolvedOptions.value
+      options: resolvedOptions.value,
+      separator: separator.value
     })
     if (result === null || result === undefined) return emptyText.value
     return String(result)
@@ -291,10 +371,12 @@ const formItemProps = computed<Record<string, unknown>>(() => {
 
   const result: Record<string, unknown> = { ...rest, class: classNames }
 
-  if (attrStyle !== undefined) result.style = attrStyle
-  if (isInTable) {
-    result.style = [attrStyle, { marginBottom: '0' }]
-  }
+  const styleParts: unknown[] = []
+  if (namespaceStyle.value) styleParts.push(namespaceStyle.value)
+  if (attrStyle !== undefined) styleParts.push(attrStyle)
+  if (isInTable) styleParts.push({ marginBottom: '0' })
+  if (styleParts.length === 1) result.style = styleParts[0]
+  else if (styleParts.length > 1) result.style = styleParts
 
   const skip = isText.value && shouldSkipValidation.value
   if (props.prop && !skip) result.prop = props.prop

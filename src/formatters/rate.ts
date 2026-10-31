@@ -22,5 +22,17 @@ export function resolveRateDisplay(value: unknown, vnode: VNode, context: Format
     props[key] = prop
   }
 
-  return h(ElRate, { ...props, modelValue: numeric, disabled: true })
+  // 中文：禁用 `el-rate` 已不可交互；再移除焦点与辅助技术暴露，并配合
+  // `.ep-field-view__rate` 的 `pointer-events: none`，避免文本态留下表单控件语义。
+  // English: A disabled `el-rate` is already non-interactive; also remove focus
+  // and assistive-technology exposure and pair it with `pointer-events: none` on
+  // `.ep-field-view__rate` so text mode keeps no form-control semantics.
+  return h(ElRate, {
+    ...props,
+    modelValue: numeric,
+    disabled: true,
+    class: 'ep-field-view__rate',
+    'aria-hidden': 'true',
+    tabindex: -1
+  })
 }

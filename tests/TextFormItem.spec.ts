@@ -8,9 +8,11 @@ import {
   ElCheckbox,
   ElCheckboxGroup,
   ElColorPickerPanel,
+  ElConfigProvider,
   ElDatePicker,
   ElDatePickerPanel,
   ElForm,
+  ElImage,
   ElInput,
   ElInputNumber,
   ElInputTag,
@@ -27,7 +29,8 @@ import {
   ElSwitch,
   ElTimePicker,
   ElTransfer,
-  ElTreeSelect
+  ElTreeSelect,
+  ElUpload
 } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import TextFormItem from '../src/components/TextFormItem.vue'
@@ -699,6 +702,60 @@ describe('value formatters', () => {
     expect(content(wrapper)).toBe('成员 1;成员 3')
   })
 
+  it('resolves upload file names from the model or the component file list', async () => {
+    const fromModel = mountItem({
+      model: { files: [{ name: '合同.pdf' }, { name: '附件.zip' }] },
+      itemProps: { prop: 'files' },
+      slot: (model) => h(ElUpload, { fileList: model.files, autoUpload: false })
+    })
+    await nextTick()
+    expect(content(fromModel.wrapper)).toBe('合同.pdf;附件.zip')
+
+    // 中文：文件列表通常只存在于组件 props，model 为空时回退到 file-list。
+    // English: File lists often live only in component props; fall back to
+    // `file-list` when the model is empty.
+    const fromProps = mountItem({
+      model: {},
+      itemProps: { prop: 'files' },
+      slot: () =>
+        h(ElUpload as any, {
+          autoUpload: false,
+          fileList: [{ name: '报价单.xlsx' }, { url: 'https://example.com/a.pdf' }, { raw: { name: '原始文件' } }]
+        })
+    })
+    await nextTick()
+    expect(content(fromProps.wrapper)).toBe('报价单.xlsx;https://example.com/a.pdf;原始文件')
+  })
+
+  it('shows image URLs by default and renders el-image in image mode', async () => {
+    const text = mountItem({
+      model: { avatar: 'https://example.com/avatar.png' },
+      itemProps: { prop: 'avatar' },
+      slot: (model) => h(ElImage, { src: model.avatar })
+    })
+    await nextTick()
+    expect(content(text.wrapper)).toBe('https://example.com/avatar.png')
+
+    const fallback = mountItem({
+      model: {},
+      itemProps: { prop: 'avatar' },
+      slot: () => h(ElImage, { src: 'https://example.com/fallback.png' })
+    })
+    await nextTick()
+    expect(content(fallback.wrapper)).toBe('https://example.com/fallback.png')
+
+    const images = mountItem({
+      model: { avatars: ['https://example.com/a.png', 'https://example.com/b.png'] },
+      itemProps: { prop: 'avatars', imageMode: 'image' },
+      slot: (model) => h(ElImage, { src: model.avatars[0] })
+    })
+    await nextTick()
+    expect(images.wrapper.findAll('.ep-field-view__image')).toHaveLength(2)
+    const first = images.wrapper.findComponent(ElImage)
+    expect(first.props('previewSrcList')).toEqual(['https://example.com/a.png', 'https://example.com/b.png'])
+    expect(first.props('previewTeleported')).toBe(true)
+  })
+
   it('uses a custom formatter and falls back to emptyText for null', async () => {
     const formatter: FieldViewFormatter = (value, context) => `${String(value)}-${context.options.length}`
     const { wrapper } = mountItem({
@@ -828,8 +885,15 @@ describe('component display extensions', () => {
       slot: (model) => h(ElRate, { modelValue: model.score })
     })
     await nextTick()
+    const rateRoot = rate.wrapper.find('.ep-field-view__rate')
+    expect(rateRoot.exists()).toBe(true)
     expect(rate.wrapper.find('.el-rate').exists()).toBe(true)
     expect(rate.wrapper.findComponent(ElRate).props('disabled')).toBe(true)
+    // 中文：文本态评分不进入 Tab 顺序，也不暴露给辅助技术。
+    // English: The text-mode rate stays out of the tab order and is hidden from AT.
+    expect(rateRoot.attributes('tabindex')).toBe('-1')
+    expect(rateRoot.attributes('aria-hidden')).toBe('true')
+    expect(rateRoot.attributes('aria-disabled')).toBe('true')
   })
 
   it('renders radio custom content as VNodes', async () => {
@@ -918,6 +982,42 @@ describe('global configuration and theming', () => {
     })
     await nextTick()
     expect(wrapper.find('.ep-field-view').classes()).toContain('ep-field-view--theme-compact')
+  })
+
+  it('maps Element Plus variables under a custom el-config-provider namespace', async () => {
+    const wrapper = mount(
+      defineComponent({
+        name: 'NamespaceHost',
+        setup() {
+          return () =>
+            h(
+              ElConfigProvider,
+              { namespace: 'v3' },
+              {
+                default: () =>
+                  h(
+                    ElForm,
+                    { model: { name: 'Vue' }, text: true },
+                    {
+                      default: () =>
+                        h(TextFormItem, { prop: 'name' }, { default: () => h(ElInput, { modelValue: 'Vue' }) })
+                    }
+                  )
+              }
+            )
+        }
+      })
+    )
+    await nextTick()
+    const root = wrapper.find('.ep-field-view')
+    const style = root.attributes('style') ?? ''
+    // 中文：变量来源指向自定义 namespace，并保留 --el-* 回退。
+    // English: Variable sources point at the custom namespace with an --el-* fallback.
+    expect(style).toContain('--ep-field-view-source-color: var(--v3-text-color-regular, var(--el-text-color-regular))')
+    expect(style).toContain('--ep-field-view-source-component-size: var(--v3-component-size, var(--el-component-size))')
+    expect(wrapper.find('.v3-form-item').exists()).toBe(true)
+    expect(content(wrapper)).toBe('Vue')
+    wrapper.unmount()
   })
 })
 
@@ -1127,6 +1227,62 @@ describe('edge cases', () => {
     expect(content(range.wrapper)).toBe('09:15:00~10:30:00')
   })
 
+  it('resolves cascader emitPath false full paths and de-duplicates values', async () => {
+    const options = [
+      {
+        value: 'guide',
+        label: '指南',
+        children: [
+          {
+            value: 'components',
+            label: '组件',
+            children: [{ value: 'text-form-item', label: 'TextFormItem' }]
+          },
+          { value: 'quick-start', label: '快速开始' }
+        ]
+      },
+      { value: 'api', label: 'API' }
+    ]
+
+    // 中文：emitPath: false 时值是叶子值，仍需展示完整路径。
+    // English: With emitPath: false the value is a leaf but the full path is
+    // still displayed.
+    const single = mountItem({
+      model: { node: 'text-form-item' },
+      itemProps: { prop: 'node' },
+      slot: (model) => h(ElCascader, { modelValue: model.node, options, props: { emitPath: false } })
+    })
+    await nextTick()
+    expect(content(single.wrapper)).toBe('指南/组件/TextFormItem')
+
+    // 中文：多选叶子值去重后按首次出现顺序展示完整路径。
+    // English: Multiple leaf values are de-duplicated and shown in first-seen
+    // order using full paths.
+    const multiple = mountItem({
+      model: { nodes: ['text-form-item', 'quick-start', 'text-form-item', 'components'] },
+      itemProps: { prop: 'nodes' },
+      slot: (model) => h(ElCascader, { modelValue: model.nodes, options, props: { multiple: true, emitPath: false } })
+    })
+    await nextTick()
+    expect(content(multiple.wrapper)).toBe('指南/组件/TextFormItem;指南/快速开始;指南/组件')
+
+    // 中文：emitPath: true 的多选路径数组同样去重。
+    // English: With emitPath: true, an array of paths is de-duplicated too.
+    const paths = mountItem({
+      model: {
+        nodes: [
+          ['guide', 'quick-start'],
+          ['guide', 'components', 'text-form-item'],
+          ['guide', 'quick-start']
+        ]
+      },
+      itemProps: { prop: 'nodes' },
+      slot: (model) => h(ElCascader, { modelValue: model.nodes, options, props: { multiple: true } })
+    })
+    await nextTick()
+    expect(content(paths.wrapper)).toBe('指南/快速开始;指南/组件/TextFormItem')
+  })
+
   it('formats cascader multiple, custom mappings and missing options', async () => {
     const options = [{ value: 'guide', label: '指南', children: [{ value: 'components', label: '组件' }] }]
     const multiple = mountItem({
@@ -1232,6 +1388,39 @@ describe('edge cases', () => {
     const wrapper = mount(TextFormItem, { props: { text: true, value: '独立值', label: '名称' } })
     await nextTick()
     expect(wrapper.text()).toContain('独立值')
+    wrapper.unmount()
+  })
+
+  it('falls back to the parent ElForm props when form context is unavailable', async () => {
+    // 中文：Nuxt/Nitro 外置本包时可能拿不到 formContextKey，父级 ElForm 的 props 作为兜底。
+    // English: Nuxt/Nitro may externalize this package and lose formContextKey;
+    // the parent ElForm props act as the fallback.
+    const FakeForm = defineComponent({
+      name: 'ElForm',
+      props: { model: { type: Object, required: true }, size: { type: String, default: undefined } },
+      setup(_props, { slots }) {
+        return () => h('div', slots.default?.())
+      }
+    })
+    const wrapper = mount(
+      defineComponent({
+        setup() {
+          return () =>
+            h(
+              FakeForm,
+              { model: { name: 'Ada', tags: ['a', 'b'] } },
+              {
+                default: () => [
+                  h(TextFormItem, { prop: 'name', text: true }),
+                  h(TextFormItem, { prop: 'tags', text: true })
+                ]
+              }
+            )
+        }
+      })
+    )
+    await nextTick()
+    expect(wrapper.findAll('.ep-field-view__content').map((item) => item.text())).toEqual(['Ada', 'a;b'])
     wrapper.unmount()
   })
 

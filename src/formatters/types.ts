@@ -1,5 +1,5 @@
 import type { VNode, VNodeChild } from 'vue'
-import type { EpFieldViewConfig, FieldViewOptionProps, InputTagMode, RateMode } from '../types'
+import type { EpFieldViewConfig, FieldViewOptionProps, ImageMode, InputTagMode, RateMode } from '../types'
 
 /**
  * 中文：格式化器运行时上下文，包含分隔符、日期格式、选项映射与评分显示方式。
@@ -17,6 +17,7 @@ export interface FormatContext {
   includeAffixes: boolean
   rateMode: RateMode
   inputTagMode: InputTagMode
+  imageMode: ImageMode
 }
 
 /**

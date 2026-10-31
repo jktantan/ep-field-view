@@ -4,6 +4,7 @@ import { isEmptyValue, toText } from '../utils/value'
 import { formatCascader } from './cascader'
 import { formatCheckbox, formatOptionGroup, resolveOptionGroupDisplay, resolveSingleChoiceDisplay } from './choice'
 import { formatDatePicker, formatTimePicker } from './date-time'
+import { formatImage, readImageSource, resolveImageDisplay } from './image'
 import { formatInput, formatInputNumber } from './input'
 import { resolveInputTagDisplay } from './input-tag'
 import { extractOptions } from './options'
@@ -14,6 +15,7 @@ import { formatGeneric } from './shared'
 import { formatSlider } from './slider'
 import { formatSwitch } from './switch'
 import { formatTransfer } from './transfer'
+import { formatUpload, readUploadFiles } from './upload'
 import type { CustomDisplayResolver, FormatContext, TextFormatter } from './types'
 
 /**
@@ -48,7 +50,9 @@ const TEXT_FORMATTERS: Record<string, TextFormatter> = {
   ElDatePickerPanel: formatDatePicker,
   ElTimePicker: formatTimePicker,
   ElCascader: formatCascader,
-  ElTransfer: formatTransfer
+  ElTransfer: formatTransfer,
+  ElUpload: formatUpload,
+  ElImage: formatImage
 }
 
 /**
@@ -68,7 +72,21 @@ const CUSTOM_DISPLAY_RESOLVERS: Record<string, CustomDisplayResolver> = {
   ElCheckboxButton: (_value, vnode) => resolveSingleChoiceDisplay(vnode),
   ElCheckbox: (_value, vnode) => resolveSingleChoiceDisplay(vnode),
   ElInputTag: resolveInputTagDisplay,
-  ElRate: resolveRateDisplay
+  ElRate: resolveRateDisplay,
+  ElImage: resolveImageDisplay
+}
+
+/**
+ * 中文：没有 model 值时可从组件自身读取的兜底值。`el-upload` 的文件列表与
+ * `el-image` 的地址通常只存在于组件 props 中。
+ *
+ * English: Fallback values read from the component itself when the model is
+ * empty. `el-upload`'s file list and `el-image`'s source usually live only in
+ * component props.
+ */
+const COMPONENT_VALUE_FALLBACKS: Record<string, (vnode: VNode) => unknown> = {
+  ElUpload: readUploadFiles,
+  ElImage: readImageSource
 }
 
 /**
@@ -107,6 +125,18 @@ export function resolveCustomDisplay(
   const name = getComponentName(vnode)
   const resolver = name ? CUSTOM_DISPLAY_RESOLVERS[name] : undefined
   return resolver?.(value, vnode, context)
+}
+
+/**
+ * 中文：当 model 值为空时，读取组件自身的兜底值（文件列表、图片地址）。
+ *
+ * English: Read the component's own fallback value (file list, image source)
+ * when the model value is empty.
+ */
+export function resolveComponentFallbackValue(vnode: VNode | null): unknown {
+  const name = getComponentName(vnode)
+  const reader = name ? COMPONENT_VALUE_FALLBACKS[name] : undefined
+  return reader && vnode ? reader(vnode) : undefined
 }
 
 function formatSimple(value: unknown, _vnode: VNode, context: FormatContext): string {

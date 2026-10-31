@@ -33,6 +33,13 @@ export interface FieldViewFormatterContext {
   value: unknown
   componentName?: string
   options: FieldViewOption[]
+  /**
+   * 中文：当前多值分隔符，与 `TextFormItem` 的 `separator` 一致。
+   *
+   * English: The active multiple-value separator, matching `TextFormItem`'s
+   * `separator`.
+   */
+  separator: string
 }
 
 /**
@@ -66,6 +73,15 @@ export type RateMode = 'text' | 'rate'
  * separator-joined text; `tag` renders readonly `el-tag`s.
  */
 export type InputTagMode = 'text' | 'tag'
+
+/**
+ * 中文：`el-image` 的文本模式展示方式。`text` 显示图片地址，
+ * `image` 渲染只读的 `el-image`（保留预览）。
+ *
+ * English: How `el-image` is displayed in text mode. `text` shows the image
+ * URL; `image` renders readonly `el-image`s with preview support.
+ */
+export type ImageMode = 'text' | 'image'
 
 /**
  * 中文：通过 `app.use(EpFieldView, options)` 注册的全局配置。
@@ -159,6 +175,13 @@ export interface EpFieldViewConfig {
    * English: How `el-input-tag` is rendered in text mode.
    */
   inputTagMode: InputTagMode
+  /**
+   * 中文：`el-image` 的展示方式，默认 `text`（地址文本）。
+   *
+   * English: How `el-image` is rendered in text mode. Defaults to `text`
+   * (the URL).
+   */
+  imageMode: ImageMode
 }
 
 export type EpFieldViewOptions = Partial<EpFieldViewConfig>
@@ -273,6 +296,12 @@ export interface TextFormItemProps {
    * English: How `el-input-tag` is rendered in text mode. Defaults to `text`.
    */
   inputTagMode?: InputTagMode
+  /**
+   * 中文：`el-image` 的展示方式，默认 `text`。
+   *
+   * English: How `el-image` is rendered in text mode. Defaults to `text`.
+   */
+  imageMode?: ImageMode
   /**
    * 中文：主题名，添加 `ep-field-view--theme-{name}` 类。
    *

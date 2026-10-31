@@ -296,7 +296,8 @@ describe('shared formatters', () => {
     optionProps: DEFAULT_OPTION_PROPS,
     includeAffixes: true,
     rateMode: 'text',
-    inputTagMode: 'text'
+    inputTagMode: 'text',
+    imageMode: 'text'
   }
 
   it('formats generic values', () => {
