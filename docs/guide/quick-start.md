@@ -148,8 +148,35 @@ const scoreFormatter: FieldViewFormatter = (value) => `${String(value ?? 0)} 分
 </TextFormItem>
 ```
 
+金额、百分比、日期与字典映射可以直接使用内置预设：
+
+```ts
+import { dictFormatter, moneyFormatter } from 'ep-field-view'
+
+const amountFormatter = moneyFormatter({ precision: 2 })
+const statusFormatter = dictFormatter({ active: '启用', disabled: '停用' })
+```
+
+详见[格式化预设](/guide/presets)。
+
+## 对象与数组字段
+
+对象 / 数组字段可以在 `text` 插槽中使用 `JsonPreview` 做结构化展示：
+
+```vue
+<TextFormItem label="扩展信息" :value="model.profile">
+  <el-input v-model="model.profileText" readonly />
+  <template #text="{ value }">
+    <JsonPreview :value="value" />
+  </template>
+</TextFormItem>
+```
+
+详见 [JsonPreview](/components/json-preview)。
+
 ## 下一步
 
 - [值解析规则](/guide/value-resolution)
+- [格式化预设](/guide/presets)
 - [主题定制](/guide/theming)
 - [组件 API](/components/text-form-item)

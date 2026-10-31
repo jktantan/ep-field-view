@@ -28,9 +28,12 @@
 ```
 src/
   components/TextFormItem.vue   组件主体：状态、slot 解析、渲染、校验、主题类
+  components/JsonPreview.vue    对象/数组字段的 JSON 结构化预览
+  nuxt.ts                       Nuxt 3 / 4 模块入口，导出 `epFieldView` 类型声明
   utils/value.ts                    路径取值、空值判定、值比较、文本化
   utils/vnode.ts                    slot/VNode 工具：文本、命名插槽、默认插槽
   formatters/                       按组件拆分的格式化器；index.ts 为注册表
+  presets.ts                        金额、百分比、日期、字典格式化预设
   utils/form-text.ts            el-form text 的 MutationObserver 同步
   config.ts                         全局配置、provide/inject、安装
   constants.ts                      默认配置、组件清单、日期格式
@@ -51,6 +54,7 @@ pnpm docs:dev     # 用户文档
 pnpm check        # format + lint + typecheck + test
 pnpm build        # 库构建（dist）
 pnpm docs:build   # 用户文档构建
+pnpm release:dry  # 发布预演（release-it）
 ```
 
 ## 文档边界

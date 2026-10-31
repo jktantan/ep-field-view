@@ -135,3 +135,49 @@ function querySearch(query, callback) {
   <el-autocomplete v-model="model.autocomplete" :fetch-suggestions="querySearch" />
 </TextFormItem>
 ```
+
+## 文本展示扩展
+
+### 格式化预设
+
+```vue
+<TextFormItem label="金额" prop="amount" :formatter="amountFormatter">
+  <el-input-number v-model="model.amount" :precision="2" />
+</TextFormItem>
+
+<TextFormItem label="完成度" prop="completion" :formatter="completionFormatter">
+  <el-input-number v-model="model.completion" :min="0" :max="1" :step="0.01" />
+</TextFormItem>
+```
+
+```ts
+import { moneyFormatter, percentFormatter } from 'ep-field-view'
+
+const amountFormatter = moneyFormatter({ precision: 2 })
+const completionFormatter = percentFormatter()
+```
+
+### 对象字段
+
+```vue
+<TextFormItem label="扩展信息" :value="model.profile">
+  <el-input v-model="model.profileText" readonly />
+  <template #text="{ value }">
+    <JsonPreview :value="value" :max-height="180" />
+  </template>
+</TextFormItem>
+```
+
+### 附件与图片
+
+```vue
+<TextFormItem label="附件" prop="attachments">
+  <el-upload v-model:file-list="model.attachments" action="#" :auto-upload="false" />
+</TextFormItem>
+
+<TextFormItem label="头像" prop="avatar" image-mode="image">
+  <el-image :src="model.avatar" fit="cover" style="width: 80px; height: 80px" />
+</TextFormItem>
+```
+
+文件列表显示文件名；`image-mode="image"` 渲染只读图片并支持预览。更多用法见[值解析规则](/guide/value-resolution)与[格式化预设](/guide/presets)。

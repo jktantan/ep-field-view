@@ -22,6 +22,8 @@
 | 模块                 | 职责                                                    | 关键约束                       |
 | -------------------- | ------------------------------------------------------- | ------------------------------ |
 | `TextFormItem.vue`   | 文本模式、字段注册、插槽转发、内容渲染、主题与尺寸类    | 不直接读写 DOM（文本模式除外） |
+| `JsonPreview.vue`    | 对象/数组字段的缩进 JSON 展示                           | 只读、无外部依赖               |
+| `presets.ts`         | 金额、百分比、日期、字典格式化预设                      | 返回 `FieldViewFormatter`      |
 | `utils/value.ts`     | `prop` 路径读取、空值判定、值比较、文本化               | 不依赖 Vue                     |
 | `utils/vnode.ts`     | slot/VNode 遍历、文本提取、命名/默认插槽内容            | 文本遍历，不挂载子组件         |
 | `formatters/`        | 按组件拆分的文本格式化与富内容解析，`index.ts` 为注册表 | 纯函数，输入 VNode + 配置      |
@@ -44,6 +46,7 @@
 | `switch.ts` / `slider.ts` / `segmented.ts` | 对应组件                                                                     |
 | `date-time.ts`                             | 日期 / 时间选择器                                                            |
 | `cascader.ts` / `transfer.ts`              | 级联 / 穿梭框                                                                |
+| `upload.ts` / `image.ts`                   | 上传文件列表 / 图片地址与预览                                                |
 | `shared.ts` / `types.ts`                   | 通用格式化、上下文与类型                                                     |
 
 取舍：按组件家族拆分后，新增组件只需新增一个文件并在 `index.ts` 注册，`CAPTURED_COMPONENTS` 自动从注册表推导；代价是文件数量增加、跨文件导入增多。相比原先的单文件，维护性和可测试性更高，因此采用该结构。

@@ -38,8 +38,10 @@
 | `ElSelect`、`ElSelectV2`、`ElTreeSelect`            | 选项 label                    | 支持单选、多选、`options` prop（含 select-v2 分组项）、`value-key` 对象值、`data` 树、静态 `el-option`，`el-select` 的 `#label` 插槽会渲染为内容；`el-option` 的 `#label` 只影响下拉项 |
 | `ElRadioGroup`、`ElRadio`、`ElRadioButton`          | 选项文本 / label              | 支持 EP 2.6+ 的 `value` 与旧版 `label`                                                                                                                                                 |
 | `ElCheckboxGroup`、`ElCheckbox`、`ElCheckboxButton` | 选项文本 / label              | 多选按 `separator` 连接；支持 `true-label` / `false-label`                                                                                                                             |
-| `ElCascader`                                        | 完整路径                      | 路径分隔符取组件 `separator`（默认 `/`），多个值用 `separator`                                                                                                                         |
+| `ElCascader`                                        | 完整路径                      | 路径分隔符取组件 `separator`（默认 `/`），多个值用 `separator`；支持 `emitPath: false` 的叶子值并展示完整路径，多选去重                                                                |
 | `ElTransfer`                                        | `data` 中对应项的 label       | 支持 `props.key` / `props.label` 映射                                                                                                                                                  |
+| `ElUpload`                                          | 文件名                        | 优先读取 model 中的文件数组，为空时读取组件 `file-list`；文件项优先 `name`，其次 `url`，多个文件用 `separator` 连接                                                                    |
+| `ElImage`                                           | 图片地址                      | 默认显示 `src`；`imageMode` 为 `image` 时渲染只读 `el-image`，保留 `fit`、`lazy` 与预览配置                                                                                            |
 | `ElSwitch`                                          | `activeText` / `inactiveText` | 缺省回退到全局配置，默认“开 / 关”                                                                                                                                                      |
 | `ElDatePicker`、`ElDatePickerPanel`                 | 日期文本                      | 支持 `date`、`datetime`、`week`、`month`、`year`、`quarter`、`dates`、多选与 `*range`                                                                                                  |
 | `ElTimePicker`                                      | 时间文本                      | 时间字符串原样展示；`Date` / 时间戳按 `timeFormat`                                                                                                                                     |
@@ -65,9 +67,52 @@
 - `el-input-number` 使用组件自身的 `formatter`；
 - `el-input` 的 `#prefix`、`#prepend`、`#append`、`#suffix` 会以文本形式按顺序拼接（例如 `https://` + 值 + `.com`、值 + `元`）。可用 `:include-affixes="false"` 或全局配置关闭；
 - `el-date-picker` / `el-time-picker` 使用组件的 `format` / `value-format`；
-- `el-cascader`、`el-tree-select`、`el-select-v2` 使用 `options` / `data` 中映射出的 label。
+- `el-cascader`、`el-tree-select`、`el-select-v2` 使用 `options` / `data` 中映射出的 label；
+- `el-image` 在 `imageMode="image"` 时渲染只读 `el-image` 并启用预览；
+- `el-upload` 读取 `file-list`，未绑定 model 时也能显示文件名。
 
 如果希望文本模式显示 `el-option` 的自定义富内容而不是选中文本，请在 `el-select` 上提供 `#label` 插槽，或在 `TextFormItem` 上使用 `text` 插槽。`formatter` 只返回文本。
+
+## 对象与数组字段
+
+未识别组件的对象值会优先读取 `label` / `name` / `title` / `text`，否则输出 `JSON.stringify`。需要更易读的结构化展示时，在 `text` 插槽中使用 `JsonPreview`：
+
+```vue
+<script setup lang="ts">
+import { JsonPreview, TextFormItem } from 'ep-field-view'
+</script>
+
+<template>
+  <TextFormItem label="扩展信息" :value="model.profile">
+    <el-input v-model="model.profileText" readonly />
+    <template #text="{ value }">
+      <JsonPreview :value="value" :max-height="240" />
+    </template>
+  </TextFormItem>
+</template>
+```
+
+详见 [JsonPreview](/components/json-preview)。
+
+## 文件与图片
+
+`ElUpload` 的文件列表优先来自 model（`v-model:file-list`），为空时回退到组件的 `file-list`：
+
+```vue
+<TextFormItem label="附件" prop="attachments">
+  <el-upload v-model:file-list="model.attachments" action="#" :auto-upload="false" />
+</TextFormItem>
+```
+
+文本模式显示文件名（没有 `name` 时显示 `url`），多个文件用 `separator` 连接。需要展示缩略图时，`ElImage` 使用 `image-mode="image"`：
+
+```vue
+<TextFormItem label="头像" prop="avatar" image-mode="image">
+  <el-image :src="model.avatar" fit="cover" style="width: 80px; height: 80px" />
+</TextFormItem>
+```
+
+`image` 模式会渲染只读的 `el-image`，并保留组件的 `fit`、`lazy` 与 `preview-src-list`；未提供预览列表时，多张图片会互相作为预览列表。缩略图尺寸可用 `--ep-field-view-image-size` 调整。
 
 ## 评分显示
 
@@ -76,6 +121,8 @@
 - `max`、`allow-half`、`colors`；
 - `icons` / `void-icon`（可以用图片替换评分图标）；
 - `size`、`show-score` 等。
+
+该 `el-rate` 同时带有 `aria-hidden="true"`、`tabindex="-1"` 与 `pointer-events: none`，不会进入 Tab 顺序、不会被辅助技术当作表单控件，也不响应指针事件。
 
 ```vue
 <TextFormItem label="评分" prop="score" rate-mode="rate">
@@ -151,9 +198,10 @@ createApp(App).use(EpFieldView, {
 
 ## 无法自动解析时
 
-以下情况建议使用 `formatter` 或 `text` 插槽：
+以下情况建议使用 `formatter`、[格式化预设](/guide/presets) 或 `text` 插槽：
 
 - 值来自接口而不是 model；
 - 选项 label 需要走异步接口二次查询；
 - 组件被自定义包装，插槽 VNode 中找不到可识别的 Element Plus 组件；
-- 希望渲染富内容（链接、标签、图片、头像组）。
+- 需要金额、百分比、日期或字典映射，可直接使用 `moneyFormatter` / `percentFormatter` / `dateFormatter` / `dictFormatter`；
+- 希望渲染富内容（链接、标签、图片、头像组），对象 / 数组可使用 `JsonPreview`。

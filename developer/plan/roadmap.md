@@ -4,13 +4,13 @@
 
 ## 项目状态
 
-| 项       | 状态                                                          |
-| -------- | ------------------------------------------------------------- |
-| 当前版本 | `0.1.0`（首个公开版本）                                       |
-| 组件 API | `TextFormItem`，参考其能力模型（API 使用 text 命名）          |
-| 测试     | Vitest，84 个用例，覆盖核心值解析、文本切换、校验、主题与插槽 |
-| 文档     | VitePress 中文文档 + 本地搜索                                 |
-| 发布     | npmjs（`ep-field-view`），ESM / UMD / CSS / d.ts              |
+| 项       | 状态                                                                        |
+| -------- | --------------------------------------------------------------------------- |
+| 当前版本 | `0.3.0`                                                                     |
+| 组件 API | `TextFormItem`，参考其能力模型（API 使用 text 命名）                        |
+| 测试     | Vitest，106 个用例，覆盖核心值解析、文本切换、校验、主题、预设与结构化展示  |
+| 文档     | VitePress 中文文档 + 本地搜索 + GitHub Pages                                |
+| 发布     | npmjs（`ep-field-view`），ESM / UMD / CSS / d.ts；release-it 自动 CHANGELOG |
 
 ## 版本路线
 
@@ -31,7 +31,7 @@
 
 **验收标准**：`pnpm check && pnpm build && pnpm docs:build` 全部通过；演示页在浅色/暗色下无布局异常；npm 包 `npm pack --dry-run` 仅包含 `dist` 与必要文档。
 
-### v0.2.0 · 稳定性与覆盖（预计 2 周）
+### v0.2.0 · 稳定性与覆盖（已完成）
 
 - [x] 补齐 `ElSelectV2` 分组、远程搜索、对象值选项的测试
 - [x] 补充 `ElDatePicker` 的 `dates`、`week`、`monthrange`、`value-format="x"` 测试
@@ -44,23 +44,24 @@
 
 **验收标准**：新增用例全部通过（84 个 Vitest + 3 个视觉回归）；覆盖率语句 93.41% / 分支 86.85%；长表单（200 个文本项）生产构建实测编辑 → 文本 61.6ms、文本 → 编辑 55.4ms（目标 ≤100ms）。
 
-### v0.3.0 · 扩展能力（预计 1 个月）
+### v0.3.0 · 扩展能力（已完成）
 
-- [ ] 常用 `formatter` 预设：金额、百分比、日期、字典映射
-- [ ] 对象/数组字段的结构化展示（文本 JSON 预览组件或插槽示例）
-- [ ] `ElUpload` 文件列表、`ElImage` 图片预览的文本展示
-- [ ] `ElCascader` 多选 `emitPath: false` 的完整路径与去重优化
-- [ ] 支持 `el-config-provider` 命名空间下的类名覆盖（可选方案）
-- [ ] 发布 GitHub Pages 文档站点
-- [ ] 增加 `CHANGELOG` 自动生成与 `release-it` / changesets 流程
+- [x] 常用 `formatter` 预设：金额、百分比、日期、字典映射
+- [x] 对象/数组字段的结构化展示（`JsonPreview` 组件与 `text` 插槽示例）
+- [x] `ElUpload` 文件列表、`ElImage` 图片预览的文本展示（`imageMode`）
+- [x] `ElCascader` 多选 `emitPath: false` 的完整路径与去重优化
+- [x] 支持 `el-config-provider` 命名空间下的类名与变量覆盖
+- [x] 发布 GitHub Pages 文档站点（`.github/workflows/docs.yml`）
+- [x] 增加 `CHANGELOG` 自动生成与 `release-it` 发布流程
+- [x] Nuxt 3 / Nuxt 4 SSR 支持（实际构建与运行时验证）
 
-**验收标准**：新增能力均有文档与示例；API 无破坏性变更；包体积（gzip）不超过 8KB（不含 Element Plus / dayjs）。
+**验收标准**：新增能力均有文档与示例；API 无破坏性变更。包体积目标为 8KB（gzip，不含 Element Plus / dayjs），但该目标在 v0.2.0 基线已超出（ESM 8.82KB）。v0.3.0 完整包实测约 10KB（terser；ESM 10.00KB / UMD 10.00KB）；后续可在 v1.0 通过拆分 `presets` / `JsonPreview` 子路径或裁剪 dayjs 插件继续优化。
 
 ### v1.0.0 · 稳定版（预计 2-3 个月）
 
 - [ ] 冻结公开 API，明确 semver 兼容策略
 - [ ] 建立 Element Plus 2.x、Vue 3.3-3.5 的版本兼容矩阵验证
-- [ ] SSR / Nuxt 3 / VitePress 集成示例
+- [ ] SSR / Nuxt 3 / 4 / VitePress 集成示例
 - [ ] 按需引入指南（unplugin-vue-components resolver）
 - [ ] 性能基准与长表单优化
 - [ ] 安全审查与依赖审计
@@ -89,3 +90,4 @@
 - `MutationObserver` 仅运行在客户端；SSR 首屏使用初始 attrs 值。
 - 文本切换会重建 `ElFormItem`，瞬时校验状态会重置。
 - 样式集中在一个 CSS 文件中，不随组件自动注入；宿主必须引入 `ep-field-view/style.css`。
+- 包体积 gzip 约 9.9KB（v0.2.0 基线 8.82KB）；如需进一步压缩，可将 `presets`、`JsonPreview` 拆为子路径导出，或裁剪 dayjs 的 week/quarter 插件。

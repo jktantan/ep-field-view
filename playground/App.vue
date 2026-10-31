@@ -370,6 +370,69 @@
             </el-col>
           </el-row>
         </section>
+
+        <section class="playground__card">
+          <div class="playground__card-header">
+            <div>
+              <h2 class="playground__card-title">文本展示扩展</h2>
+              <p class="playground__card-desc">
+                formatter 预设、对象 JSON 预览、文件列表、图片预览，以及 <code>emitPath: false</code> 的级联多选。
+              </p>
+            </div>
+          </div>
+          <el-row :gutter="24">
+            <el-col :xs="24" :md="12">
+              <TextFormItem label="金额（预设）" prop="amount" :formatter="amountFormatter">
+                <el-input-number v-model="model.amount" :min="0" :precision="2" controls-position="right" />
+              </TextFormItem>
+            </el-col>
+            <el-col :xs="24" :md="12">
+              <TextFormItem label="完成度（百分比）" prop="completion" :formatter="completionFormatter">
+                <el-input-number v-model="model.completion" :min="0" :max="1" :step="0.01" />
+              </TextFormItem>
+            </el-col>
+            <el-col :xs="24" :md="12">
+              <TextFormItem label="入职日期（预设）" prop="hiredAt" :formatter="hiredAtFormatter">
+                <el-date-picker v-model="model.hiredAt" type="date" placeholder="选择日期" />
+              </TextFormItem>
+            </el-col>
+            <el-col :xs="24" :md="12">
+              <TextFormItem label="状态（字典）" prop="status" :formatter="statusFormatter">
+                <el-select v-model="model.status">
+                  <el-option label="启用" value="active" />
+                  <el-option label="停用" value="disabled" />
+                </el-select>
+              </TextFormItem>
+            </el-col>
+            <el-col :xs="24" :md="12">
+              <TextFormItem label="对象字段（JSON）" :value="model.profile">
+                <el-input :model-value="JSON.stringify(model.profile)" readonly />
+                <template #text="{ value }">
+                  <JsonPreview :value="value" :max-height="180" />
+                </template>
+              </TextFormItem>
+            </el-col>
+            <el-col :xs="24" :md="12">
+              <TextFormItem label="附件" prop="attachments">
+                <el-upload v-model:file-list="model.attachments" action="#" :auto-upload="false" />
+              </TextFormItem>
+            </el-col>
+            <el-col :xs="24" :md="12">
+              <TextFormItem label="头像（图片预览）" prop="avatar" image-mode="image">
+                <el-image :src="model.avatar" style="width: 80px; height: 80px" />
+              </TextFormItem>
+            </el-col>
+            <el-col :xs="24" :md="12">
+              <TextFormItem label="级联（emitPath: false）" prop="cascaderFlat">
+                <el-cascader
+                  v-model="model.cascaderFlat"
+                  :options="cascaderOptions"
+                  :props="{ multiple: true, emitPath: false }"
+                />
+              </TextFormItem>
+            </el-col>
+          </el-row>
+        </section>
       </el-form>
 
       <section class="playground__card">
@@ -411,6 +474,7 @@
 import { computed, reactive, ref, watchEffect } from 'vue'
 import { ElMessage } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
+import { JsonPreview, dateFormatter, dictFormatter, moneyFormatter, percentFormatter } from 'ep-field-view'
 import type { FieldViewFormatter } from 'ep-field-view'
 
 // 中文：支持 URL 参数（text / theme / dark），视觉回归与分享链接可复现同一状态。
@@ -459,6 +523,21 @@ const model = reactive({
   treeSelect: 'leaf-2',
   segmented: 'weekly',
   empty: '',
+  amount: 1234.5,
+  completion: 0.86,
+  hiredAt: new Date(2024, 4, 20),
+  status: 'active',
+  avatar: 'https://element-plus.org/images/element-plus-logo.svg',
+  attachments: [
+    { name: '合同.pdf', url: 'https://example.com/contract.pdf' },
+    { name: '报价单.xlsx', url: 'https://example.com/quote.xlsx' }
+  ],
+  profile: {
+    name: '张三',
+    roles: ['admin', 'editor'],
+    address: { city: '上海', district: '浦东新区' }
+  },
+  cascaderFlat: ['form', 'table', 'form'],
   nested: {
     user: {
       name: '张三'
@@ -587,6 +666,10 @@ const tableData = [
 
 const pointsFormatter: FieldViewFormatter = (value) => `${String(value ?? 0)} 分`
 const priceFormatter = (value: number | undefined): string => `¥ ${value ?? 0}`
+const amountFormatter = moneyFormatter({ precision: 2 })
+const completionFormatter = percentFormatter()
+const hiredAtFormatter = dateFormatter('YYYY年MM月DD日')
+const statusFormatter = dictFormatter({ active: '启用', disabled: '停用' })
 
 const themeClass = computed(() => (theme.value && theme.value !== 'default' ? `playground__theme-${theme.value}` : ''))
 

@@ -23,6 +23,8 @@ pnpm docs:dev     # 用户文档
 pnpm check        # prettier + eslint + stylelint + vue-tsc + vitest
 pnpm build        # ESM / UMD / CSS / d.ts
 pnpm docs:build   # VitePress 用户文档
+pnpm release:dry  # 发布预演（release-it）
+pnpm release      # 发布：CHANGELOG、tag、npm、GitHub Release
 npm pack --dry-run
 ```
 
@@ -33,6 +35,8 @@ npm pack --dry-run
 ```
 src/
   components/TextFormItem.vue   组件状态、slot、渲染、校验、主题类
+  components/JsonPreview.vue    对象/数组字段的 JSON 结构化预览
+  nuxt.ts                       Nuxt 3 / 4 模块入口与类型声明
   formatters/
     index.ts                    组件 → 格式化器 / 富内容解析器注册表
     options.ts                  选项收集与 option VNode 查找

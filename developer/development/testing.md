@@ -8,6 +8,8 @@
 tests/
   setup.ts                  jsdom 补丁：ResizeObserver、matchMedia
   utils.spec.ts             纯函数：getByPath、isEmptyValue、isSameValue、resolveConfig
+  presets.spec.ts           格式化预设：金额、百分比、日期、字典映射
+  JsonPreview.spec.ts       结构化预览：缩进、序列化、循环引用、空值
   TextFormItem.spec.ts  组件行为：文本、值、格式化、富内容、主题、校验
   visual/                   Playwright 视觉回归与长表单基准
     playground.spec.ts      浅色 / 暗色 / compact 截图比对
@@ -39,14 +41,14 @@ const { wrapper } = mountItem({
 
 ## 覆盖范围
 
-| describe                           | 覆盖点                                                                                                               |
-| ---------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `text state`                       | 编辑态、继承 `el-form text`、prop 覆盖、运行时切换                                                                   |
-| `value resolution`                 | 嵌套路径、显式 value、空值 / 0 / false、数组分隔符、空值文案                                                         |
-| `value formatters`                 | select/radio/checkbox/cascader/switch/date/time/slider/transfer/formatter                                            |
-| `component display extensions`     | 输入框前后缀、`includeAffixes`、select `#label` VNode、多选 label、option label 语义、InputNumber formatter、size 类 |
-| `global configuration and theming` | 全局配置、主题类、nowrap 类                                                                                          |
-| `slots and validation`             | text 插槽、label 插槽、文本模式跳过校验与编辑态恢复                                                                  |
+| describe                           | 覆盖点                                                                                                                         |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `text state`                       | 编辑态、继承 `el-form text`、prop 覆盖、运行时切换                                                                             |
+| `value resolution`                 | 嵌套路径、显式 value、空值 / 0 / false、数组分隔符、空值文案                                                                   |
+| `value formatters`                 | select/radio/checkbox/cascader/switch/date/time/slider/transfer/upload/image/formatter，含 `emitPath: false` 去重              |
+| `component display extensions`     | 输入框前后缀、`includeAffixes`、select `#label` VNode、多选 label、option label 语义、InputNumber formatter、图片预览、size 类 |
+| `global configuration and theming` | 全局配置、主题类、nowrap 类、`el-config-provider` 命名空间                                                                     |
+| `slots and validation`             | text 插槽、label 插槽、文本模式跳过校验与编辑态恢复                                                                            |
 
 `utils.spec.ts` 覆盖路径/空值/比较/配置合并。
 

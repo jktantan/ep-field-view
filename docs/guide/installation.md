@@ -2,13 +2,14 @@
 
 ## 环境要求
 
-| 依赖                     | 版本         |
-| ------------------------ | ------------ |
-| Vue                      | `>= 3.3.0`   |
-| Element Plus             | `>= 2.6.0`   |
-| Node.js（仅构建 / 开发） | `>= 20.19.0` |
+| 依赖                     | 版本          |
+| ------------------------ | ------------- |
+| Vue                      | `>= 3.3.0`    |
+| Element Plus             | `>= 2.6.0`    |
+| Node.js（仅构建 / 开发） | `>= 20.19.0`  |
+| Nuxt（可选）             | `3.x` / `4.x` |
 
-`vue` 与 `element-plus` 是 peer 依赖，不会被重复打包。`dayjs` 是运行时依赖，与 Element Plus 使用同一套日期格式化能力。
+`vue` 与 `element-plus` 是 peer 依赖，不会被重复打包。`dayjs` 是运行时依赖，与 Element Plus 使用同一套日期格式化能力。Nuxt 3 / 4 的接入方式与已验证版本见 [Nuxt 3 / 4 与 SSR](./ssr.md)。
 
 ## 包管理器安装
 
@@ -41,7 +42,25 @@ import 'ep-field-view/style.css'
 
 ## 注册组件
 
-### 全量安装（推荐）
+### Nuxt 3 / 4
+
+Nuxt 项目推荐使用模块子路径，自动注册组件、样式与全局配置：
+
+```ts
+// nuxt.config.ts
+export default defineNuxtConfig({
+  modules: ['@element-plus/nuxt', 'ep-field-view/nuxt'],
+  epFieldView: {
+    emptyText: '-',
+    separator: '、',
+    rangeSeparator: '至'
+  }
+})
+```
+
+`epFieldView` 的类型为 `EpFieldViewOptions`，与 `app.use(EpFieldView, options)` 一致。详细目录结构与 SSR 注意事项见 [Nuxt 3 / 4 与 SSR](./ssr.md)。
+
+### 全量安装（Vue 应用）
 
 ```ts
 import { createApp } from 'vue'

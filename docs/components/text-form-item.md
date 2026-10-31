@@ -38,11 +38,12 @@ Element Plus 表单字段有三种相互独立的状态：
 | `skipValidation` | 文本模式跳过校验                                               | `boolean`                                       | `true`                                                                           |
 | `rateMode`       | `el-rate` 的显示方式：`text` 分数 / `rate` 评分样式            | `'text' \| 'rate'`                              | `text`                                                                           |
 | `inputTagMode`   | `el-input-tag` 的显示方式：`text` 文本 / `tag` 只读标签        | `'text' \| 'tag'`                               | `text`                                                                           |
+| `imageMode`      | `el-image` 的显示方式：`text` 地址 / `image` 图片预览          | `'text' \| 'image'`                             | `text`                                                                           |
 | `theme`          | 主题名，添加 `ep-field-view--theme-{name}` 类                  | `string`                                        | `''`                                                                             |
 | `contentClass`   | 文本内容元素的额外类名                                         | `string \| string[] \| Record<string, boolean>` | —                                                                                |
 | `contentStyle`   | 文本内容元素的内联样式                                         | `StyleValue`                                    | —                                                                                |
 
-> 未传 `text`、`nowrap`、`skipValidation`、`rateMode`、`inputTagMode` 时使用 `undefined`，以便继承表单或全局配置；显式 `false` 会覆盖继承值。
+> 未传 `text`、`nowrap`、`skipValidation`、`rateMode`、`inputTagMode`、`imageMode` 时使用 `undefined`，以便继承表单或全局配置；显式 `false` 会覆盖继承值。
 
 ### FieldViewFormatter
 
@@ -54,11 +55,12 @@ export type FieldViewFormatter = (
     value: unknown
     componentName?: string
     options: FieldViewOption[]
+    separator: string
   }
 ) => string | number | null | undefined
 ```
 
-返回 `null` / `undefined` 时显示 `emptyText`。
+返回 `null` / `undefined` 时显示 `emptyText`。<code>separator</code> 与当前 `TextFormItem` 的多值分隔符一致，便于预设复用同一排版。
 
 ### FieldViewOption / FieldViewOptionProps
 
@@ -112,6 +114,7 @@ interface FieldViewOptionProps {
 | `skipValidation` | `boolean`              | `true` | 文本模式跳过校验                  |
 | `rateMode`       | `'text' \| 'rate'`     | `text` | 评分显示方式                      |
 | `inputTagMode`   | `'text' \| 'tag'`      | `text` | 输入标签显示方式                  |
+| `imageMode`      | `'text' \| 'image'`    | `text` | 图片显示方式                      |
 | `nowrapInTable`  | `boolean`              | `true` | 表格内自动省略                    |
 | `optionProps`    | `FieldViewOptionProps` | 见上   | 选项字段映射                      |
 | `includeAffixes` | `boolean`              | `true` | 拼接输入框前后缀插槽文本          |
@@ -123,6 +126,7 @@ interface FieldViewOptionProps {
 ```ts
 import EpFieldView, {
   TextFormItem,
+  JsonPreview,
   // 全局配置
   EP_FIELD_VIEW_CONFIG_KEY,
   createConfig,
@@ -131,6 +135,11 @@ import EpFieldView, {
   useEpFieldViewConfig,
   DEFAULT_CONFIG,
   DEFAULT_OPTION_PROPS,
+  // 格式化预设
+  dateFormatter,
+  dictFormatter,
+  moneyFormatter,
+  percentFormatter,
   // 工具
   formatFieldValue,
   extractOptions,
@@ -140,7 +149,7 @@ import EpFieldView, {
 } from 'ep-field-view'
 ```
 
-类型导出：`EpFieldViewConfig`、`EpFieldViewOptions`、`TextFormItemProps`、`RateMode`、`InputTagMode`、`FieldViewFormatter`、`FieldViewFormatterContext`、`FieldViewOption`、`FieldViewOptionProps`。
+类型导出：`EpFieldViewConfig`、`EpFieldViewOptions`、`TextFormItemProps`、`RateMode`、`InputTagMode`、`ImageMode`、`FieldViewFormatter`、`FieldViewFormatterContext`、`FieldViewOption`、`FieldViewOptionProps`、`MoneyFormatterOptions`、`PercentFormatterOptions`、`DateFormatterOptions`、`DictFormatterOptions`、`DictFallback`、`DictSource`。
 
 ## 注意事项
 
@@ -150,4 +159,4 @@ import EpFieldView, {
 - 表格内的文本项没有 `el-form` 上下文时，请使用 `value` 传入值，或确保外层存在表单。
 - `formatter` 只返回文本；需要图标、链接、Tag 等富内容时使用 `text` 插槽。
 - 组件自身的选中值插槽（如 `el-select` 的 `#label`）会被渲染为 VNode；`el-option` 的 `#label` 只影响下拉项，不用于选中值。
-- 在 `el-config-provider` 下使用时，组件类名固定为 `ep-field-view`，但颜色/尺寸仍跟随 Element Plus 变量。
+- 在 `el-config-provider` 下使用时，组件会读取命名空间并把 Element Plus 变量来源映射到 `--{namespace}-*`（保留 `--el-*` 回退）；内部 form-item 元素通过类名后缀匹配，因此自定义命名空间也能保持尺寸与间距。

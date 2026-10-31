@@ -30,8 +30,9 @@ export default defineConfig({
             { text: '安装', link: '/guide/installation' },
             { text: '快速开始', link: '/guide/quick-start' },
             { text: '值解析规则', link: '/guide/value-resolution' },
+            { text: '格式化预设', link: '/guide/presets' },
             { text: '主题定制', link: '/guide/theming' },
-            { text: 'Nuxt 3 与 SSR', link: '/guide/ssr' },
+            { text: 'Nuxt 3 / 4 与 SSR', link: '/guide/ssr' },
             { text: '与参考项目的差异', link: '/guide/comparison' }
           ]
         }
@@ -41,6 +42,7 @@ export default defineConfig({
           text: '组件',
           items: [
             { text: 'TextFormItem', link: '/components/text-form-item' },
+            { text: 'JsonPreview', link: '/components/json-preview' },
             { text: '演示', link: '/components/demo' }
           ]
         }

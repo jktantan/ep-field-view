@@ -28,6 +28,9 @@ Element Plus 的表单字段有三种相互独立的状态：
 - **校验自动跳过**：文本模式字段不参与校验、不显示必填星号；切回编辑态自动恢复。
 - **组件自定义显示**：直接渲染 `el-select` 的 `#label` 与 `el-radio` / `el-checkbox` 选中项的 VNode，保留图标、Tag 等富内容。
 - **可扩展**：`formatter`、`text` 插槽、显式 `options` / `optionProps`。
+- **格式化预设**：金额、百分比、日期、字典映射，直接传给 `formatter`。
+- **结构化展示**：`JsonPreview` 以缩进 JSON 展示对象 / 数组；`ElUpload` 显示文件名，`ElImage` 支持图片预览。
+- **命名空间适配**：支持 `el-config-provider` 的 `namespace`，变量与 form-item 样式同步适配。
 - **多值分隔符可配**：默认 `;`，可按语言或产品规范覆盖。
 - **评分显示可配**：默认分数文本，`rateMode="rate"` 渲染禁用状态的 `el-rate`，保留自定义图标/图片。
 - **主题化**：CSS 变量、内置主题、自定义主题类、暗色模式，默认跟随 Element Plus 变量。
@@ -57,6 +60,23 @@ createApp(App)
   .use(EpFieldView, { emptyText: '-', separator: '、', rangeSeparator: '至' })
   .mount('#app')
 ```
+
+### Nuxt 3 / 4
+
+Nuxt 3 与 Nuxt 4 使用同一个模块入口：
+
+```ts
+// nuxt.config.ts
+export default defineNuxtConfig({
+  modules: ['@element-plus/nuxt', 'ep-field-view/nuxt'],
+  epFieldView: {
+    emptyText: '-',
+    separator: '、'
+  }
+})
+```
+
+模块会自动注册组件、引入样式并透传全局配置；`epFieldView` 在 Nuxt 配置中有完整类型提示。详见 [Nuxt 3 / 4 与 SSR](./guide/ssr.md)。
 
 ## 快速开始
 
@@ -140,27 +160,31 @@ const model = reactive({
 
 ## API 摘要
 
-| 参数                                         | 说明                                    | 默认值               |
-| -------------------------------------------- | --------------------------------------- | -------------------- |
-| `prop`                                       | model 字段路径，支持 `a.b[0].c`         | —                    |
-| `value`                                      | 显式显示值，优先于 model                | —                    |
-| `text`                                       | 文本模式；不传则继承表单的 `text` 属性  | —                    |
-| `emptyText` / `separator` / `rangeSeparator` | 空值、多值、范围文案                    | `-` / `;` / `~`      |
-| `dateFormat` / `timeFormat`                  | 日期 / 时间格式                         | 组件 `format` 或内置 |
-| `formatter`                                  | 自定义文本格式化                        | —                    |
-| `options` / `optionProps`                    | 显式选项与字段映射                      | —                    |
-| `includeAffixes`                             | 拼接输入框前后缀插槽文本                | `true`               |
-| `nowrap` / `skipValidation` / `theme`        | 表格省略 / 跳过校验 / 主题              | 自动 / `true` / `''` |
-| `rateMode`                                   | 评分显示：`text` 分数 / `rate` 评分样式 | `text`               |
-| `contentClass` / `contentStyle`              | 文本内容元素样式                        | —                    |
+| 参数                                         | 说明                                     | 默认值               |
+| -------------------------------------------- | ---------------------------------------- | -------------------- |
+| `prop`                                       | model 字段路径，支持 `a.b[0].c`          | —                    |
+| `value`                                      | 显式显示值，优先于 model                 | —                    |
+| `text`                                       | 文本模式；不传则继承表单的 `text` 属性   | —                    |
+| `emptyText` / `separator` / `rangeSeparator` | 空值、多值、范围文案                     | `-` / `;` / `~`      |
+| `dateFormat` / `timeFormat`                  | 日期 / 时间格式                          | 组件 `format` 或内置 |
+| `formatter`                                  | 自定义文本格式化                         | —                    |
+| `options` / `optionProps`                    | 显式选项与字段映射                       | —                    |
+| `includeAffixes`                             | 拼接输入框前后缀插槽文本                 | `true`               |
+| `nowrap` / `skipValidation` / `theme`        | 表格省略 / 跳过校验 / 主题               | 自动 / `true` / `''` |
+| `rateMode`                                   | 评分显示：`text` 分数 / `rate` 评分样式  | `text`               |
+| `inputTagMode`                               | 输入标签：`text` 文本 / `tag` 只读标签   | `text`               |
+| `imageMode`                                  | 图片显示：`text` 地址 / `image` 图片预览 | `text`               |
+| `contentClass` / `contentStyle`              | 文本内容元素样式                         | —                    |
 
-其余 `el-form-item` 属性与插槽（`label`、`error` 等）原样透传。完整文档见 [docs](https://github.com/jktantan/ep-field-view/tree/main/docs)：
+其余 `el-form-item` 属性与插槽（`label`、`error` 等）原样透传。完整文档见 [文档站](https://jktantan.github.io/ep-field-view/) 或 [docs 目录](https://github.com/jktantan/ep-field-view/tree/main/docs)：
 
 - [安装](https://github.com/jktantan/ep-field-view/blob/main/docs/guide/installation.md)
 - [快速开始](https://github.com/jktantan/ep-field-view/blob/main/docs/guide/quick-start.md)
 - [值解析规则](https://github.com/jktantan/ep-field-view/blob/main/docs/guide/value-resolution.md)
+- [格式化预设](https://github.com/jktantan/ep-field-view/blob/main/docs/guide/presets.md)
 - [主题定制](https://github.com/jktantan/ep-field-view/blob/main/docs/guide/theming.md)
 - [组件 API](https://github.com/jktantan/ep-field-view/blob/main/docs/components/text-form-item.md)
+- [JsonPreview](https://github.com/jktantan/ep-field-view/blob/main/docs/components/json-preview.md)
 - [与参考项目的差异](https://github.com/jktantan/ep-field-view/blob/main/docs/guide/comparison.md)
 
 ## 开发者文档
@@ -188,15 +212,17 @@ pnpm docs:dev     # 文档
 pnpm check        # prettier + eslint + stylelint + vue-tsc + vitest
 pnpm build        # 库构建
 pnpm docs:build   # 文档构建
+pnpm release:dry  # 发布预演（release-it）
 ```
 
 ## 兼容性
 
-| 依赖            | 版本         |
-| --------------- | ------------ |
-| Vue             | `>= 3.3.0`   |
-| Element Plus    | `>= 2.6.0`   |
-| Node.js（开发） | `>= 20.19.0` |
+| 依赖            | 版本          |
+| --------------- | ------------- |
+| Vue             | `>= 3.3.0`    |
+| Element Plus    | `>= 2.6.0`    |
+| Nuxt（可选）    | `3.x` / `4.x` |
+| Node.js（开发） | `>= 20.19.0`  |
 
 ## License
 

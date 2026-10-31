@@ -10,17 +10,22 @@
 
 所有变量都定义在 `.ep-field-view` 上，可在任意祖先容器中覆盖：
 
-| 变量                            | 默认值                             | 说明                            |
-| ------------------------------- | ---------------------------------- | ------------------------------- |
-| `--ep-field-view-color`         | `var(--el-text-color-regular)`     | 文本颜色                        |
-| `--ep-field-view-empty-color`   | `var(--el-text-color-placeholder)` | 空值文本颜色                    |
-| `--ep-field-view-font-size`     | `var(--el-font-size-base)`         | 字号                            |
-| `--ep-field-view-font-weight`   | `400`                              | 字重                            |
-| `--ep-field-view-line-height`   | `1.6`                              | 行高                            |
-| `--ep-field-view-word-break`    | `break-all`                        | 长文本断行策略                  |
-| `--ep-field-view-content-width` | `100%`                             | 内容宽度                        |
-| `--ep-field-view-min-height`    | `var(--el-component-size)`         | 文本行最小高度（随 size 变化）  |
-| `--ep-field-view-tag-gap`       | `6px`（small 为 `4px`）            | `inputTagMode="tag"` 的标签间距 |
+| 变量                                | 默认值                             | 说明                            |
+| ----------------------------------- | ---------------------------------- | ------------------------------- |
+| `--ep-field-view-color`             | `var(--el-text-color-regular)`     | 文本颜色                        |
+| `--ep-field-view-empty-color`       | `var(--el-text-color-placeholder)` | 空值文本颜色                    |
+| `--ep-field-view-font-size`         | `var(--el-font-size-base)`         | 字号                            |
+| `--ep-field-view-font-weight`       | `400`                              | 字重                            |
+| `--ep-field-view-line-height`       | `1.6`                              | 行高                            |
+| `--ep-field-view-word-break`        | `break-all`                        | 长文本断行策略                  |
+| `--ep-field-view-content-width`     | `100%`                             | 内容宽度                        |
+| `--ep-field-view-min-height`        | `var(--el-component-size)`         | 文本行最小高度（随 size 变化）  |
+| `--ep-field-view-tag-gap`           | `6px`（small 为 `4px`）            | `inputTagMode="tag"` 的标签间距 |
+| `--ep-field-view-image-size`        | `64px`                             | 图片预览缩略图尺寸              |
+| `--ep-field-view-image-radius`      | `4px`                              | 图片预览圆角                    |
+| `--ep-field-view-json-bg`           | `--el-fill-color-light`            | JSON 预览背景                   |
+| `--ep-field-view-json-border-color` | `--el-border-color-lighter`        | JSON 预览边框                   |
+| `--ep-field-view-json-font-size`    | `12px`                             | JSON 预览字号                   |
 
 ```css
 /* 某个详情页容器内统一调整 */
@@ -122,7 +127,25 @@ document.documentElement.classList.toggle('dark', isDark)
 
 ## 与 Element Plus 配置提供者配合
 
-`el-config-provider` 设置的命名空间不会改变组件的类名，但组件内部使用 Element Plus 组件与变量，因此仍会跟随 `el-config-provider` 的尺寸、语言与主题变量。组件的 BEM 类名固定为 `ep-field-view`，便于宿主稳定覆盖。
+`el-config-provider` 的 `namespace` 会改变 Element Plus 的类名与 CSS 变量前缀。组件会读取命名空间并自动适配：
+
+- 组件会把内部使用的 Element Plus 变量来源重定向到 `--{namespace}-*`，同时保留 `--el-*` 回退；
+- 内部 form-item 的间距与标签字号通过类名后缀选择器（`[class*='-form-item__content']`）匹配，不依赖固定的 `el-` 前缀；
+- 组件自身的 BEM 类名始终是 `ep-field-view`，方便宿主稳定覆盖。
+
+```vue
+<el-config-provider namespace="v3">
+  <el-form :model="model" text>
+    <TextFormItem label="名称" prop="name">
+      <el-input v-model="model.name" />
+    </TextFormItem>
+  </el-form>
+</el-config-provider>
+```
+
+::: tip
+只修改 `namespace` 而不同时编译 Element Plus 主题变量时，`--{namespace}-*` 可能不存在；组件已回退到 `--el-*`，颜色与尺寸仍然可用。
+:::
 
 ## 表格中的样式
 

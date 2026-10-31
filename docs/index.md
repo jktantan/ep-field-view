@@ -24,6 +24,8 @@ features:
     details: 文本模式下字段不参与校验，也不会显示必填星号；切回编辑态自动恢复注册与规则。
   - title: 主题化
     details: 基于 Element Plus CSS 变量，提供 CSS 自定义属性、内置主题与任意自定义主题类，天然支持暗色模式。
+  - title: 扩展与预设
+    details: 金额、百分比、日期、字典映射预设，JsonPreview 对象预览，ElUpload / ElImage 展示，以及 el-config-provider 命名空间适配。
   - title: 类型完整
     details: 使用 TypeScript 编写，提供完整 d.ts、全局配置类型与 formatter / 文本插槽扩展。
 ---
