@@ -56,4 +56,16 @@ const EpFieldView: EpFieldViewPlugin = {
   JsonPreview
 }
 
+// 中文：`app.use(EpFieldView)` 会全局注册组件；这里补充模板类型声明，
+// 否则 Volar / vue-tsc 会把 `<TextFormItem>` 当成未知标签。
+// English: `app.use(EpFieldView)` registers the components globally. Declare
+// them for template type checking; otherwise Volar / vue-tsc reports
+// `<TextFormItem>` as an unknown tag.
+declare module 'vue' {
+  interface GlobalComponents {
+    TextFormItem: typeof TextFormItem
+    JsonPreview: typeof JsonPreview
+  }
+}
+
 export default EpFieldView

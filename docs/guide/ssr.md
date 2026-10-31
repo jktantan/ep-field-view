@@ -56,10 +56,10 @@ export default defineNuxtConfig({
 
 模块会自动完成：
 
-1. 全局注册 `<TextFormItem>` 与 `<JsonPreview>`；
+1. 把 `<TextFormItem>` 与 `<JsonPreview>` 注册进 Nuxt 组件系统（自动导入并生成 `components.d.ts` 类型声明），同时通过插件全局注册；
 2. 补上包内直接使用的 Element Plus 组件样式（`el-form-item`、`el-image`、`el-rate`、`el-tag`），再引入 `ep-field-view/style.css`；
 3. 将本包加入 `build.transpile`，避免 Nitro 外置造成重复的 Element Plus 注入 key；
-4. 把 `epFieldView` 配置传给 `app.use(EpFieldView, options)`。
+4. 把 `epFieldView` 配置传给 `app.use(EpFieldView, options)`，并把模块选项类型注入 `.nuxt`，让 `nuxt.config.ts` 获得提示。
 
 第 2 步是为了补上模板扫描的盲区：`@element-plus/nuxt` 只会为项目模板里的 `<el-*>` 注入样式，而本包在源码中直接 import 了 `ElFormItem` / `ElImage` / `ElRate` / `ElTag`。如果宿主自己管理这些样式，可以关闭自动注入：
 
@@ -72,7 +72,7 @@ export default defineNuxtConfig({
 })
 ```
 
-`epFieldView` 的类型为 `EpFieldViewOptions`，与 `app.use(EpFieldView, options)` 完全一致；Nuxt 配置中会获得类型提示：
+`epFieldView` 的类型为 `EpFieldViewOptions`，与 `app.use(EpFieldView, options)` 完全一致；模块会把类型注入 `.nuxt`，Nuxt 配置中会获得类型提示：
 
 ```ts
 export default defineNuxtConfig({
@@ -177,6 +177,8 @@ export default defineNuxtConfig({
   ]
 })
 ```
+
+手动注册时，包主入口已经声明了 `GlobalComponents`，模板中的 `<TextFormItem>` / `<JsonPreview>` 同样能被类型检查识别。安装或升级后如果仍提示未知标签，重启编辑器的 TS Server 并重新执行 `nuxt prepare`，让 `.nuxt` 下的类型声明重新生成。
 
 ## 为什么不需要额外配置
 

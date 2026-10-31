@@ -1,4 +1,4 @@
-import { addPluginTemplate, defineNuxtModule } from '@nuxt/kit'
+import { addComponent, addPluginTemplate, addTypeTemplate, defineNuxtModule } from '@nuxt/kit'
 import { ELEMENT_PLUS_STYLE_PATHS } from './nuxt-styles'
 import type { EpFieldViewOptions } from './types'
 
@@ -45,8 +45,9 @@ declare module '@nuxt/schema' {
 export { ELEMENT_PLUS_STYLE_COMPONENTS, ELEMENT_PLUS_STYLE_PATHS, getElementPlusStylePath } from './nuxt-styles'
 
 /**
- * 中文：Nuxt 3 / 4 模块。自动注册组件、引入 Element Plus 依赖样式与自身的
- * 样式，并把配置传给全局插件。
+ * 中文：Nuxt 3 / 4 模块。把组件注册到 Nuxt 的组件系统（自动导入并生成
+ * `components.d.ts`），引入 Element Plus 依赖样式与自身的样式，并把配置
+ * 传给全局插件。
  *
  * ```ts
  * // nuxt.config.ts
@@ -56,7 +57,8 @@ export { ELEMENT_PLUS_STYLE_COMPONENTS, ELEMENT_PLUS_STYLE_PATHS, getElementPlus
  * })
  * ```
  *
- * English: Nuxt 3 / 4 module. Registers the components, injects the Element
+ * English: Nuxt 3 / 4 module. Registers the components with Nuxt's component
+ * system (auto-import plus generated `components.d.ts`), injects the Element
  * Plus dependency styles and its own stylesheet, and passes the options to the
  * global plugin.
  */
@@ -96,6 +98,37 @@ export default defineNuxtModule<ModuleOptions>({
     if (!nuxt.options.build.transpile.includes('ep-field-view')) {
       nuxt.options.build.transpile.push('ep-field-view')
     }
+
+    // 中文：注册到 Nuxt 的组件系统后，Nuxt 会生成 `components.d.ts` 并把
+    // 组件写入 `GlobalComponents`；仅靠 `app.use` 全局注册时模板类型检查
+    // （Volar / vue-tsc）看不到它们，会报“未知标签”。
+    // English: Registering through Nuxt's component system makes Nuxt generate
+    // `components.d.ts` and `GlobalComponents` entries. A plugin-only
+    // `app.use` registration stays invisible to template type checking
+    // (Volar / vue-tsc) and is reported as an unknown tag.
+    addComponent({ name: 'TextFormItem', export: 'TextFormItem', filePath: 'ep-field-view' })
+    addComponent({ name: 'JsonPreview', export: 'JsonPreview', filePath: 'ep-field-view' })
+
+    // 中文：模块入口的 d.ts 不会因为 `modules` 里的字符串自动加载，这里把
+    // 配置类型注入 `.nuxt`，让 nuxt.config.ts 的 `epFieldView` 有类型提示。
+    // English: A string entry in `modules` does not load the module's d.ts, so
+    // inject the config types into `.nuxt` to type `epFieldView` in
+    // nuxt.config.ts.
+    addTypeTemplate({
+      filename: 'types/ep-field-view.d.ts',
+      getContents: () => `import type { ModuleOptions } from 'ep-field-view/nuxt'
+
+declare module '@nuxt/schema' {
+  interface NuxtConfig {
+    epFieldView?: ModuleOptions
+  }
+
+  interface NuxtOptions {
+    epFieldView?: ModuleOptions
+  }
+}
+`
+    })
 
     addPluginTemplate({
       filename: 'ep-field-view.mjs',
