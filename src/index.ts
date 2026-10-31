@@ -66,6 +66,35 @@ declare module 'vue' {
     TextFormItem: typeof TextFormItem
     JsonPreview: typeof JsonPreview
   }
+
+  /**
+   * 中文：`el-form` 的 `text` 是本项目的扩展属性，Element Plus 并未声明它。
+   * 运行时它以 fallthrough attribute 落在 `<form>` 上，由 `TextFormItem`
+   * 观察后切换文本模式；这里补充类型声明，让 `<el-form :text>` 在模板中
+   * 获得提示与检查。
+   *
+   * 不增强 `element-plus` 的 `FormProps`：它在 Element Plus 2.6–2.13 中是
+   * `ExtractPropTypes` 类型别名，接口合并会冲突或静默失效。
+   *
+   * English: `text` on `el-form` is this package's extension attribute;
+   * Element Plus does not declare it. At runtime it falls through to the
+   * `<form>` element and `TextFormItem` observes it to toggle text mode.
+   * Declare it here so `<el-form :text>` gets completion and type checking in
+   * templates.
+   *
+   * We do not augment Element Plus' `FormProps`: in Element Plus 2.6–2.13 it is
+   * an `ExtractPropTypes` type alias, so interface merging would conflict or be
+   * silently ignored.
+   */
+  interface ComponentCustomProps {
+    /**
+     * 中文：文本模式开关，作用于 `el-form`。支持布尔值和静态属性写法。
+     *
+     * English: Text-mode switch for `el-form`. Accepts booleans and static
+     * attribute values.
+     */
+    text?: boolean | 'true' | 'false'
+  }
 }
 
 export default EpFieldView

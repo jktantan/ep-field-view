@@ -175,7 +175,7 @@ import EpFieldView, {
 
 - `skipValidation` 为 `true` 时，文本模式字段不会注册到 `el-form`，因此 `validate()` 不会校验它；切回编辑态会重新注册。
 - 文本模式切换会重建内部 `ElFormItem`，以保证校验注册正确；瞬时校验状态会被清除，表单数据不受影响。
-- `el-form` 的 `text` 是本组件识别的扩展属性，不是 Element Plus 官方 prop；它通过 fallthrough attribute 传递。
+- `el-form` 的 `text` 是本组件识别的扩展属性，不是 Element Plus 官方 prop；它通过 fallthrough attribute 传递。包主入口已通过 Vue 的 `ComponentCustomProps` 为它补上类型声明（`boolean | 'true' | 'false'`），因此 `<el-form :text>`、`<el-form text>` 在模板中都有提示与检查。
 - 表格内的文本项没有 `el-form` 上下文时，请使用 `value` 传入值，或确保外层存在表单。
 - `formatter` 只返回文本；需要图标、链接、Tag 等富内容时使用 `text` 插槽。
 - 组件自身的选中值插槽（如 `el-select` 的 `#label`）会被渲染为 VNode；`el-option` 的 `#label` 只影响下拉项，不用于选中值。
