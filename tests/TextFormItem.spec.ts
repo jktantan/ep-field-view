@@ -16,10 +16,13 @@ import {
   ElInputTag,
   ElMention,
   ElOption,
+  ElOptionGroup,
   ElRadio,
   ElRadioGroup,
   ElRate,
+  ElSegmented,
   ElSelect,
+  ElSelectV2,
   ElSlider,
   ElSwitch,
   ElTimePicker,
@@ -249,6 +252,77 @@ describe('value formatters', () => {
     expect(content(wrapper)).toBe('北京;上海')
   })
 
+  it('resolves select v2 grouped and object option labels', async () => {
+    const grouped = mountItem({
+      model: { city: 'sh' },
+      itemProps: { prop: 'city' },
+      slot: (model) =>
+        h(ElSelectV2, {
+          modelValue: model.city,
+          options: [
+            { label: '华东', options: [{ label: '上海', value: 'sh' }] },
+            { label: '华北', options: [{ label: '北京', value: 'bj' }] }
+          ]
+        })
+    })
+    await nextTick()
+    expect(content(grouped.wrapper)).toBe('上海')
+
+    // 中文：对象值需要按 value-key 匹配，model 与选项通常不是同一引用。
+    // English: Object values match by value-key; model and option are separate references.
+    const objectValue = mountItem({
+      model: { city: { id: 2 } },
+      itemProps: { prop: 'city' },
+      slot: (model) =>
+        h(ElSelectV2, {
+          modelValue: model.city,
+          valueKey: 'id',
+          options: [
+            { label: '北京', value: { id: 1 } },
+            { label: '上海', value: { id: 2 } }
+          ]
+        })
+    })
+    await nextTick()
+    expect(content(objectValue.wrapper)).toBe('上海')
+  })
+
+  it('resolves segmented option labels', async () => {
+    const { wrapper } = mountItem({
+      model: { view: 'list' },
+      itemProps: { prop: 'view' },
+      slot: (model) =>
+        h(ElSegmented, {
+          modelValue: model.view,
+          options: [
+            { label: '列表', value: 'list' },
+            { label: '卡片', value: 'card' }
+          ]
+        })
+    })
+    await nextTick()
+    expect(content(wrapper)).toBe('列表')
+  })
+
+  it('refreshes text when async options arrive after mount', async () => {
+    const options = reactive<Array<{ label: string; value: string }>>([])
+    const { wrapper } = mountItem({
+      model: { city: 'sh' },
+      itemProps: { prop: 'city' },
+      slot: (model) => h(ElSelectV2, { modelValue: model.city, options })
+    })
+    await nextTick()
+    // 中文：选项尚未返回时回退到原始值。
+    // English: Fall back to the raw value until options arrive.
+    expect(content(wrapper)).toBe('sh')
+
+    options.push({ label: '上海', value: 'sh' })
+    // 中文：`nextTick` 在 post flush 之后解析，此时文本应已刷新。
+    // English: `nextTick` resolves after the post flush, when text is refreshed.
+    await nextTick()
+    expect(content(wrapper)).toBe('上海')
+  })
+
   it('resolves radio and checkbox labels', async () => {
     const radio = mountItem({
       model: { radio: 'a' },
@@ -398,6 +472,42 @@ describe('value formatters', () => {
     expect(content(months.wrapper)).toBe('2024-01;2024-05')
   })
 
+  it('formats date picker dates, week, month range and timestamp values', async () => {
+    const dates = mountItem({
+      model: { value: [new Date(2024, 4, 1), new Date(2024, 4, 20)] },
+      itemProps: { prop: 'value' },
+      slot: (model) => h(ElDatePicker, { modelValue: model.value, type: 'dates' })
+    })
+    await nextTick()
+    expect(content(dates.wrapper)).toBe('2024-05-01;2024-05-20')
+
+    const week = mountItem({
+      model: { value: new Date(2024, 0, 3) },
+      itemProps: { prop: 'value' },
+      slot: (model) => h(ElDatePicker, { modelValue: model.value, type: 'week' })
+    })
+    await nextTick()
+    // 中文：`week` 使用 dayjs 的本地化周格式，`[w]` 是字面量 `w`。
+    // English: `week` uses dayjs' localized week format; `[w]` is a literal `w`.
+    expect(content(week.wrapper)).toBe('2024w01')
+
+    const monthRange = mountItem({
+      model: { value: [new Date(2024, 0, 1), new Date(2024, 4, 1)] },
+      itemProps: { prop: 'value' },
+      slot: (model) => h(ElDatePicker, { modelValue: model.value, type: 'monthrange' })
+    })
+    await nextTick()
+    expect(content(monthRange.wrapper)).toBe('2024-01~2024-05')
+
+    const timestamp = mountItem({
+      model: { value: String(new Date(2024, 4, 20).getTime()) },
+      itemProps: { prop: 'value' },
+      slot: (model) => h(ElDatePicker, { modelValue: model.value, type: 'date', valueFormat: 'x' })
+    })
+    await nextTick()
+    expect(content(timestamp.wrapper)).toBe('2024-05-20')
+  })
+
   it('formats date and color panel components', async () => {
     const date = mountItem({
       model: { value: new Date(2024, 4, 20) },
@@ -492,6 +602,9 @@ describe('value formatters', () => {
       slot: (model) => h(ElInputTag, { modelValue: model.tags, tagType: 'success', tagEffect: 'dark' })
     })
     await nextTick()
+    const tagGroup = wrapper.find('.ep-field-view__content > .ep-field-view__tags')
+    expect(tagGroup.exists()).toBe(true)
+    expect(tagGroup.findAll('.el-tag')).toHaveLength(2)
     const tags = wrapper.findAll('.ep-field-view__content .el-tag')
     expect(tags).toHaveLength(2)
     expect(tags[0].text()).toBe('vue')
@@ -507,6 +620,55 @@ describe('value formatters', () => {
     })
     await nextTick()
     expect(global.wrapper.findAll('.ep-field-view__content .el-tag')).toHaveLength(1)
+  })
+
+  it('keeps segmented, tree select and input tag edge cases in text mode', async () => {
+    const primitiveOptions = mountItem({
+      model: { scale: 'week' },
+      itemProps: { prop: 'scale' },
+      slot: (model) => h(ElSegmented, { modelValue: model.scale, options: ['day', 'week'] })
+    })
+    await nextTick()
+    expect(content(primitiveOptions.wrapper)).toBe('week')
+
+    const unmatched = mountItem({
+      model: { view: 'card' },
+      itemProps: { prop: 'view' },
+      slot: (model) =>
+        h(ElSegmented, {
+          modelValue: model.view,
+          options: [{ label: '列表', value: 'list' }]
+        })
+    })
+    await nextTick()
+    expect(content(unmatched.wrapper)).toBe('card')
+
+    const missingNode = mountItem({
+      model: { node: 'unknown' },
+      itemProps: { prop: 'node' },
+      slot: (model) => h(ElTreeSelect, { modelValue: model.node, data: [] })
+    })
+    await nextTick()
+    expect(content(missingNode.wrapper)).toBe('unknown')
+
+    // 中文：tag 模式下空数组仍回退到 emptyText，不渲染空容器。
+    // English: An empty array still falls back to emptyText in tag mode.
+    const emptyTags = mountItem({
+      model: { tags: [] },
+      itemProps: { prop: 'tags', inputTagMode: 'tag' },
+      slot: (model) => h(ElInputTag, { modelValue: model.tags })
+    })
+    await nextTick()
+    expect(content(emptyTags.wrapper)).toBe('-')
+    expect(emptyTags.wrapper.find('.ep-field-view__tags').exists()).toBe(false)
+
+    const plainTag = mountItem({
+      model: { tags: ['vue'] },
+      itemProps: { prop: 'tags', inputTagMode: 'tag' },
+      slot: (model) => h(ElInputTag, { modelValue: model.tags, tagEffect: 'plain' })
+    })
+    await nextTick()
+    expect(plainTag.wrapper.find('.ep-field-view__tags .el-tag').classes()).toContain('el-tag--plain')
   })
 
   it('joins slider ranges with rangeSeparator', async () => {
@@ -818,6 +980,324 @@ describe('slots and validation', () => {
     const fields = (formRef.value as unknown as { fields: Array<{ propString: string }> }).fields
     expect(fields.length).toBe(1)
     expect(fields[0]!.propString).toBe('name')
+    wrapper.unmount()
+  })
+})
+
+describe('edge cases', () => {
+  it('formats boolean labels, slider and rate fallbacks', async () => {
+    const checkbox = mountItem({
+      model: { agree: false },
+      itemProps: { prop: 'agree' },
+      slot: (model) => h(ElCheckbox, { modelValue: model.agree, trueValue: '同意', falseValue: '不同意' })
+    })
+    await nextTick()
+    expect(content(checkbox.wrapper)).toBe('不同意')
+
+    const switchFallback = mountItem({
+      model: { status: 'unknown' },
+      itemProps: { prop: 'status' },
+      slot: (model) => h(ElSwitch, { modelValue: model.status, activeValue: 'on', inactiveValue: 'off' })
+    })
+    await nextTick()
+    expect(content(switchFallback.wrapper)).toBe('unknown')
+
+    const slider = mountItem({
+      model: { level: 30 },
+      itemProps: { prop: 'level' },
+      slot: (model) => h(ElSlider, { modelValue: model.level })
+    })
+    await nextTick()
+    expect(content(slider.wrapper)).toBe('30')
+
+    // 中文：非数字评分回退到通用文本。
+    // English: A non-numeric rate falls back to generic text.
+    const rate = mountItem({
+      model: { score: 'not-a-number' },
+      itemProps: { prop: 'score', rateMode: 'rate' },
+      slot: (model) => h(ElRate, { modelValue: model.score })
+    })
+    await nextTick()
+    expect(content(rate.wrapper)).toBe('not-a-number')
+  })
+
+  it('handles date and time strings with value formats', async () => {
+    // 中文：value-format 与展示格式一致时直接返回原字符串。
+    // English: When value-format matches the display format, keep the string.
+    const sameFormat = mountItem({
+      model: { value: '2024-05-20' },
+      itemProps: { prop: 'value' },
+      slot: (model) => h(ElDatePicker, { modelValue: model.value, valueFormat: 'YYYY-MM-DD' })
+    })
+    await nextTick()
+    expect(content(sameFormat.wrapper)).toBe('2024-05-20')
+
+    const parsed = mountItem({
+      model: { value: '2024/05/20' },
+      itemProps: { prop: 'value' },
+      slot: (model) => h(ElDatePicker, { modelValue: model.value })
+    })
+    await nextTick()
+    expect(content(parsed.wrapper)).toBe('2024-05-20')
+
+    const invalid = mountItem({
+      model: { value: 'not-a-date' },
+      itemProps: { prop: 'value' },
+      slot: (model) => h(ElDatePicker, { modelValue: model.value })
+    })
+    await nextTick()
+    expect(content(invalid.wrapper)).toBe('not-a-date')
+
+    const invalidTimestamp = mountItem({
+      model: { time: 'abc' },
+      itemProps: { prop: 'time' },
+      slot: (model) => h(ElTimePicker, { modelValue: model.time, valueFormat: 'x' })
+    })
+    await nextTick()
+    expect(content(invalidTimestamp.wrapper)).toBe('abc')
+  })
+
+  it('formats checkboxes with partial labels and rate arrays', async () => {
+    const checked = mountItem({
+      model: { agree: true },
+      itemProps: { prop: 'agree' },
+      slot: (model) => h(ElCheckbox, { modelValue: model.agree, trueValue: '同意' })
+    })
+    await nextTick()
+    expect(content(checked.wrapper)).toBe('同意')
+
+    // 中文：只配置一侧文案时，另一侧使用默认的“是 / 否”。
+    // English: When only one side is configured, the other uses 是 / 否.
+    const trueDefault = mountItem({
+      model: { agree: true },
+      itemProps: { prop: 'agree' },
+      slot: (model) => h(ElCheckbox, { modelValue: model.agree, falseValue: '不同意' })
+    })
+    await nextTick()
+    expect(content(trueDefault.wrapper)).toBe('是')
+
+    const falseDefault = mountItem({
+      model: { agree: false },
+      itemProps: { prop: 'agree' },
+      slot: (model) => h(ElCheckbox, { modelValue: model.agree, trueValue: '同意' })
+    })
+    await nextTick()
+    expect(content(falseDefault.wrapper)).toBe('否')
+
+    const rateArray = mountItem({
+      model: { score: [1, 2] },
+      itemProps: { prop: 'score' },
+      slot: (model) => h(ElRate, { modelValue: model.score })
+    })
+    await nextTick()
+    expect(content(rateArray.wrapper)).toBe('1;2')
+  })
+
+  it('formats time picker strings, timestamps and ranges', async () => {
+    const stringValue = mountItem({
+      model: { time: '09:15:00' },
+      itemProps: { prop: 'time' },
+      slot: (model) => h(ElTimePicker, { modelValue: model.time })
+    })
+    await nextTick()
+    expect(content(stringValue.wrapper)).toBe('09:15:00')
+
+    const timestamp = mountItem({
+      model: { time: String(new Date(2024, 4, 20, 9, 15, 0).getTime()) },
+      itemProps: { prop: 'time' },
+      slot: (model) => h(ElTimePicker, { modelValue: model.time, valueFormat: 'x' })
+    })
+    await nextTick()
+    expect(content(timestamp.wrapper)).toBe('09:15:00')
+
+    const numeric = mountItem({
+      model: { time: new Date(2024, 4, 20, 9, 15, 0).getTime() },
+      itemProps: { prop: 'time' },
+      slot: (model) => h(ElTimePicker, { modelValue: model.time })
+    })
+    await nextTick()
+    expect(content(numeric.wrapper)).toBe('09:15:00')
+
+    const range = mountItem({
+      model: { time: [new Date(2024, 4, 20, 9, 15, 0), new Date(2024, 4, 20, 10, 30, 0)] },
+      itemProps: { prop: 'time' },
+      slot: (model) => h(ElTimePicker, { modelValue: model.time, isRange: true })
+    })
+    await nextTick()
+    expect(content(range.wrapper)).toBe('09:15:00~10:30:00')
+  })
+
+  it('formats cascader multiple, custom mappings and missing options', async () => {
+    const options = [{ value: 'guide', label: '指南', children: [{ value: 'components', label: '组件' }] }]
+    const multiple = mountItem({
+      model: { path: ['components'] },
+      itemProps: { prop: 'path' },
+      slot: (model) => h(ElCascader, { modelValue: model.path, options, props: { multiple: true } })
+    })
+    await nextTick()
+    expect(content(multiple.wrapper)).toBe('指南/组件')
+
+    const customMapping = mountItem({
+      model: { node: ['c2'] },
+      itemProps: { prop: 'node' },
+      slot: (model) =>
+        h(ElCascader, {
+          modelValue: model.node,
+          options: [{ id: 'c1', name: '甲', nodes: [{ id: 'c2', name: '乙' }] }],
+          props: { label: 'name', value: 'id', children: 'nodes' }
+        })
+    })
+    await nextTick()
+    expect(content(customMapping.wrapper)).toBe('甲/乙')
+
+    const missing = mountItem({
+      model: { node: 'c1' },
+      itemProps: { prop: 'node' },
+      slot: (model) => h(ElCascader, { modelValue: model.node })
+    })
+    await nextTick()
+    expect(content(missing.wrapper)).toBe('c1')
+  })
+
+  it('falls back for transfer data and unmatched values', async () => {
+    const noData = mountItem({
+      model: { items: ['a'] },
+      itemProps: { prop: 'items' },
+      slot: (model) => h(ElTransfer, { modelValue: model.items })
+    })
+    await nextTick()
+    expect(content(noData.wrapper)).toBe('a')
+
+    const unmatched = mountItem({
+      model: { items: ['a'] },
+      itemProps: { prop: 'items' },
+      slot: (model) => h(ElTransfer, { modelValue: model.items, data: [{ key: 'b', label: 'B' }] })
+    })
+    await nextTick()
+    expect(content(unmatched.wrapper)).toBe('a')
+  })
+
+  it('formats input arrays and survives a throwing number formatter', async () => {
+    const arrayInput = mountItem({
+      model: { text: ['a', 'b'] },
+      itemProps: { prop: 'text' },
+      slot: (model) => h(ElInput, { modelValue: model.text })
+    })
+    await nextTick()
+    expect(content(arrayInput.wrapper)).toBe('a;b')
+
+    const number = mountItem({
+      model: { count: 5 },
+      itemProps: { prop: 'count' },
+      slot: (model) =>
+        h(ElInputNumber, {
+          modelValue: model.count,
+          formatter: () => {
+            throw new Error('boom')
+          }
+        })
+    })
+    await nextTick()
+    expect(content(number.wrapper)).toBe('5')
+  })
+
+  it('collects grouped slot options and label-only options', async () => {
+    const grouped = mountItem({
+      model: { city: 'bj' },
+      itemProps: { prop: 'city' },
+      slot: (model) =>
+        h(
+          ElSelect,
+          { modelValue: model.city },
+          {
+            default: () =>
+              h(ElOptionGroup, { label: '华北' }, { default: () => [h(ElOption, { label: '北京', value: 'bj' })] })
+          }
+        )
+    })
+    await nextTick()
+    expect(content(grouped.wrapper)).toBe('北京')
+
+    const labelOnly = mountItem({
+      model: { city: '上海' },
+      itemProps: { prop: 'city' },
+      slot: (model) =>
+        h(ElSelect, { modelValue: model.city }, { default: () => [h(ElOption as any, { label: '上海' })] })
+    })
+    await nextTick()
+    expect(content(labelOnly.wrapper)).toBe('上海')
+  })
+
+  it('renders without a parent form', async () => {
+    const wrapper = mount(TextFormItem, { props: { text: true, value: '独立值', label: '名称' } })
+    await nextTick()
+    expect(wrapper.text()).toContain('独立值')
+    wrapper.unmount()
+  })
+
+  it('detects table rows and removes the bottom margin', async () => {
+    // 中文：用同名父组件验证父链识别，避免依赖 el-table 的布局实现。
+    // English: A same-name parent verifies the chain lookup without relying on
+    // el-table's layout implementation.
+    const FakeTable = defineComponent({
+      name: 'ElTable',
+      setup(_props, { slots }) {
+        return () => h('div', slots.default?.())
+      }
+    })
+    const wrapper = mount(
+      defineComponent({
+        setup() {
+          return () => h(FakeTable, null, { default: () => h(TextFormItem, { text: true, value: 'Vue' }) })
+        }
+      })
+    )
+    await nextTick()
+    const item = wrapper.find('.ep-field-view--nowrap')
+    expect(item.exists()).toBe(true)
+    expect(item.attributes('style')).toContain('margin-bottom: 0')
+    wrapper.unmount()
+  })
+})
+
+describe('long form', () => {
+  it('switches a 200-field form to text mode', async () => {
+    const fieldCount = 200
+    const model = reactive(
+      Object.fromEntries(Array.from({ length: fieldCount }, (_, index) => [`field${index}`, `值 ${index}`]))
+    )
+    const text = ref(false)
+
+    const Host = defineComponent({
+      name: 'LongFormHost',
+      setup() {
+        return () =>
+          h(ElForm, { model, text: text.value } as Record<string, unknown>, {
+            default: () =>
+              Array.from({ length: fieldCount }, (_, index) =>
+                h(TextFormItem, { prop: `field${index}`, label: `字段 ${index}` } as Record<string, unknown>, {
+                  default: () => h(ElInput, { modelValue: model[`field${index}`] })
+                })
+              )
+          })
+      }
+    })
+
+    const wrapper = mount(Host)
+    await nextTick()
+    expect(wrapper.findAll('.ep-field-view__content')).toHaveLength(0)
+
+    // 中文：切换耗时在 jsdom 中只用于防止量级回归；浏览器目标为 100ms。
+    // English: The jsdom timing only guards against order-of-magnitude
+    // regressions; the browser target is 100ms.
+    const started = performance.now()
+    text.value = true
+    await settle()
+    const elapsed = performance.now() - started
+
+    expect(wrapper.findAll('.ep-field-view__content')).toHaveLength(fieldCount)
+    expect(wrapper.text()).toContain('值 199')
+    expect(elapsed).toBeLessThan(2000)
     wrapper.unmount()
   })
 })

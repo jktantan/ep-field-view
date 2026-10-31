@@ -14,12 +14,13 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     include: ['tests/**/*.spec.ts'],
+    exclude: ['tests/visual/**', '**/node_modules/**', '**/dist/**'],
     setupFiles: ['tests/setup.ts'],
     css: false,
     coverage: {
       provider: 'v8',
       include: ['src/**/*.{ts,vue}'],
-      exclude: ['src/index.ts', 'src/types.ts', 'src/constants.ts']
+      exclude: ['src/index.ts', 'src/types.ts', 'src/constants.ts', 'src/env.d.ts']
     }
   }
 })
