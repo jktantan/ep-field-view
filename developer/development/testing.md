@@ -101,7 +101,7 @@ pnpm test:watch
 pnpm test:coverage
 ```
 
-CI 与 `pnpm check` 会运行 `pnpm test`。
+`pnpm check` 会运行 `pnpm test`。
 
 ## 视觉验证
 

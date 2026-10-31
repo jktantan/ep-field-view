@@ -8,9 +8,9 @@
 | -------------------- | ---------------------------- | ----------------- |
 | Vue                  | `>= 3.3.0`                   | 单测 + playground |
 | Element Plus         | `>= 2.6.0`                   | 单测 + playground |
-| Node.js（开发/构建） | `>= 20.19.0`                 | CI                |
+| Node.js（开发/构建） | `>= 20.19.0`                 | 本地构建          |
 | TypeScript           | `>= 5.0`（开发使用 6.x）     | `vue-tsc`         |
-| 包管理器             | pnpm 10+（仓库使用 pnpm 12） | CI                |
+| 包管理器             | pnpm 10+（仓库使用 pnpm 12） | 本地安装          |
 
 Element Plus 的 `el-form` 没有声明 `text` prop，本组件通过 fallthrough attribute + `MutationObserver` 读取，因此 **Element Plus 未来若正式声明 `text` prop，需要同步调整读取方式**。这是升级时最重要的检查点。
 
@@ -18,7 +18,7 @@ Element Plus 的 `el-form` 没有声明 `text` prop，本组件通过 fallthroug
 
 | 类型                                | 频率                     | 处理方式                            |
 | ----------------------------------- | ------------------------ | ----------------------------------- |
-| Element Plus patch                  | 每周                     | 自动合并，CI 通过即可               |
+| Element Plus patch                  | 每周                     | 自动合并，`pnpm check` 通过即可     |
 | Element Plus minor                  | 每月                     | 检查新增/变更组件 API，补充回归用例 |
 | Element Plus major                  | 发布后 1 个 minor 周期内 | 建立适配分支，更新 peer 范围        |
 | Vue minor                           | 每季度                   | 跟随 Element Plus 支持范围          |

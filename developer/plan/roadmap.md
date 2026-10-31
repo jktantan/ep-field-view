@@ -27,7 +27,7 @@
 - [x] 文本模式跳过校验，编辑态恢复
 - [x] playground 全组件演示
 - [x] Vitest 单元测试、ESLint / Stylelint / Prettier
-- [x] VitePress 文档、npm 发布配置、CI
+- [x] VitePress 文档、npm 发布配置、本地检查脚本
 
 **验收标准**：`pnpm check && pnpm build && pnpm docs:build` 全部通过；演示页在浅色/暗色下无布局异常；npm 包 `npm pack --dry-run` 仅包含 `dist` 与必要文档。
 
@@ -59,7 +59,7 @@
 ### v1.0.0 · 稳定版（预计 2-3 个月）
 
 - [ ] 冻结公开 API，明确 semver 兼容策略
-- [ ] 建立 Element Plus 2.x、Vue 3.3-3.5 的版本兼容矩阵 CI
+- [ ] 建立 Element Plus 2.x、Vue 3.3-3.5 的版本兼容矩阵验证
 - [ ] SSR / Nuxt 3 / VitePress 集成示例
 - [ ] 按需引入指南（unplugin-vue-components resolver）
 - [ ] 性能基准与长表单优化

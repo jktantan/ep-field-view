@@ -5,8 +5,7 @@
 ## 前置条件
 
 - npmjs 账号拥有 `ep-field-view` 包的发布权限（`npm owner ls ep-field-view`）；
-- 仓库 Secrets 配置 `NPM_TOKEN`（npm Automation token，需有 publish 权限）；
-- 本地已登录 npm（手动发布时）：`npm login`；
+- 本地已登录 npm：`npm login`；
 - 工作区干净，位于 `main` 分支且与远端同步。
 
 ## 版本策略
@@ -45,23 +44,7 @@ dist/components/...
 
 ## 发布流程
 
-### 方式一：GitHub Actions（推荐）
-
-1. 更新 `CHANGELOG.md`，将 `Unreleased` 改为目标版本与日期；
-2. 更新 `package.json` 的 `version`；
-3. 提交并推送：
-   ```bash
-   git add .
-   git commit -m "chore: release v0.1.1"
-   git tag v0.1.1
-   git push origin main --tags
-   ```
-4. `.github/workflows/release.yml` 会自动：
-   - 安装依赖、构建；
-   - 执行 `pnpm publish --access public --provenance`；
-   - 创建 GitHub Release。
-
-### 方式二：手动发布
+发布前先更新 `CHANGELOG.md`，将 `Unreleased` 改为目标版本与日期；然后执行：
 
 ```bash
 pnpm version patch   # 或 minor / major
