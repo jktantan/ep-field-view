@@ -44,17 +44,64 @@ dist/components/...
 
 ## 发布流程
 
-发布前先更新 `CHANGELOG.md`，将 `Unreleased` 改为目标版本与日期；然后执行：
+发布使用 [release-it](https://github.com/release-it/release-it) 与
+[`@release-it/conventional-changelog`](https://github.com/release-it/conventional-changelog)，
+根据 Conventional Commits 自动推导版本、生成 CHANGELOG、提交、打 tag、发布 npm 并创建 GitHub Release。
+
+### 1. 准备
 
 ```bash
-pnpm version patch   # 或 minor / major
-pnpm check
-pnpm build
+npm login                       # 确认 npm 发布权限
+export GITHUB_TOKEN=ghp_xxx     # 创建 GitHub Release（PowerShell: $env:GITHUB_TOKEN = "ghp_xxx"）
+git switch main && git pull
+```
+
+工作区必须干净，且位于 `main` 分支。
+
+> 仓库若尚未创建历史版本 tag（首次接入 release-it），release-it 无法从提交推导基线版本。
+> 首次发布请显式指定目标版本，例如 `pnpm release 0.3.0`；之后即可按 Conventional Commits 自动推导。
+> 不要用 `--no-git` 计算版本，它会让版本回退到初始值。
+
+### 2. 预演
+
+```bash
+pnpm release:dry
+```
+
+dry-run 会执行 `before:init` 钩子（`pnpm check`、`pnpm build`、`pnpm docs:build`），
+并展示将要执行的提交、tag、npm 发布与 GitHub Release 命令，但不会写入文件或发布。
+
+### 3. 发布
+
+```bash
+pnpm release            # 交互选择 patch / minor / major
+pnpm release minor      # 或直接指定
+```
+
+release-it 会：
+
+1. 运行 `pnpm check`、`pnpm build`、`pnpm docs:build`；
+2. 提升 `package.json` 版本；
+3. 根据提交生成 `CHANGELOG.md` 条目；
+4. 提交 `chore: release v{version}` 并打 `v{version}` tag；
+5. 推送提交与 tag；
+6. 发布 npm（`publishConfig.access` 已为 `public`）；
+7. 创建 GitHub Release。
+
+`prepublishOnly` 仍会再次执行 `check`、`build` 与 `docs:build`，作为发布保护。
+
+### 手动兜底
+
+release-it 不可用时，仍可手动发布：
+
+```bash
+pnpm version patch      # 或 minor / major
+pnpm check && pnpm build && pnpm docs:build
 pnpm publish --access public
 git push origin main --tags
 ```
 
-`prepublishOnly` 会再次执行 `check`、`build` 与 `docs:build`，作为发布保护。
+手动发布后需自行更新 `CHANGELOG.md` 并创建 GitHub Release。
 
 ## 发布后
 
@@ -64,7 +111,7 @@ git push origin main --tags
    npm view ep-field-view version
    npm pack ep-field-view@<version>
    ```
-3. 创建 GitHub Release，附 CHANGELOG 摘要；
+3. 确认 GitHub Release 内容与 `CHANGELOG.md` 一致；
 4. 如有严重问题，使用 `npm deprecate` 标记问题版本并发布 patch：
    ```bash
    npm deprecate ep-field-view@0.1.0 "请升级到 0.1.1，修复了 xxx"

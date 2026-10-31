@@ -15,6 +15,14 @@ export default defineConfig({
   ],
   build: {
     target: 'es2018',
+    minify: 'terser',
+    terserOptions: {
+      // 中文：多轮压缩可进一步减小体积；注释与调试信息由 sourcemap 提供。
+      // English: Extra passes shrink the bundle further; comments and debug
+      // information remain available through sourcemaps.
+      compress: { passes: 3 },
+      format: { comments: false }
+    },
     sourcemap: true,
     emptyOutDir: true,
     lib: {

@@ -2,6 +2,25 @@
 
 完整版本记录同步维护在仓库根目录的 [CHANGELOG.md](https://github.com/jktantan/ep-field-view/blob/main/CHANGELOG.md)。
 
+## 0.3.0
+
+扩展能力版本。
+
+### 新增
+
+- 格式化预设：`moneyFormatter`、`percentFormatter`、`dateFormatter`、`dictFormatter`。
+- `JsonPreview` 组件：对象 / 数组字段的缩进 JSON 展示，支持 Date / Map / Set / BigInt 与循环引用。
+- `ElUpload` 文件列表文本展示（文件名优先，回退 URL），以及 `ElImage` 的 `imageMode` 图片预览。
+- `el-config-provider` 自定义 `namespace` 适配：变量来源重定向与 form-item 类名后缀匹配。
+- Nuxt 3 / Nuxt 4 SSR 支持：模块入口 `ep-field-view/nuxt`，`epFieldView` 配置带类型提示，自动注册组件、样式与全局配置（实际验证 3.21.11 / 4.6.3）；Nitro 外置导致 `formContextKey` 重复时，回退到父级 `ElForm` 的 `model` / `size` props。
+- `FieldViewFormatterContext` 增加 `separator`。
+
+### 改进
+
+- `ElCascader` 支持 `emitPath: false` 的完整路径展示，多选值与路径去重，索引改为 O(1) 查找。
+- 文档增加格式化预设、JsonPreview、扩展组件与命名空间说明。
+- 发布流程接入 `release-it` 与自动 CHANGELOG。
+
 ## 0.1.0
 
 首个公开版本。

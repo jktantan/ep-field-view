@@ -7,6 +7,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-10-31
+
+### Added
+
+- Formatter presets: `moneyFormatter`, `percentFormatter`, `dateFormatter`
+  and `dictFormatter`, exported with their option types.
+- `JsonPreview` component for structured object / array values, with Date,
+  Map, Set, BigInt and circular-reference handling. Registered globally when
+  the plugin is installed.
+- `ElUpload` text display: file names from the model file list, falling back
+  to the component `file-list`, then to URLs.
+- `ElImage` support with `imageMode: 'text' | 'image'`; image mode renders
+  readonly `el-image` thumbnails with preview, `fit` and `lazy` preserved.
+- `el-config-provider` namespace support: Element Plus variable sources are
+  redirected to `--{namespace}-*` with `--el-*` fallbacks, and form-item
+  selectors match by class suffix.
+- Nuxt 3 / Nuxt 4 SSR support with a typed module entry:
+  `modules: ['ep-field-view/nuxt']` and `epFieldView` options. The module
+  registers components, injects the stylesheet and transpiles the package.
+  Verified with Nuxt 3.21.11 and 4.6.3.
+- When Nitro externalizes this package and `formContextKey` is duplicated, the
+  component falls back to the parent `ElForm`'s `model` / `size` props.
+- `FieldViewFormatterContext.separator` so custom formatters can reuse the
+  active multiple-value separator.
+
+### Changed
+
+- `ElCascader` now resolves `emitPath: false` leaf values to full paths and
+  de-duplicates multiple values and paths. The index uses O(1) map lookups.
+- `rateMode="rate"` keeps using a disabled `el-rate`, but now adds
+  `aria-hidden`, `tabindex="-1"` and `pointer-events: none`, so text mode
+  exposes no interactive form control.
+- Release flow uses `release-it` with `@release-it/conventional-changelog`;
+  CHANGELOG entries and GitHub releases are generated from Conventional
+  Commits.
+- Docs add formatter presets, JsonPreview, upload/image and namespace guides,
+  and the playground demonstrates the new capabilities.
+
+## [0.2.0] - 2026-10-31
+
 ### Added
 
 - `ElSelectV2` grouped options and `value-key` object values now resolve to
@@ -76,3 +116,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - runtime: `dayjs ^1.11`
 
 [0.1.0]: https://github.com/jktantan/ep-field-view/releases/tag/v0.1.0
+[0.2.0]: https://github.com/jktantan/ep-field-view/releases/tag/v0.2.0
+[0.3.0]: https://github.com/jktantan/ep-field-view/releases/tag/v0.3.0
