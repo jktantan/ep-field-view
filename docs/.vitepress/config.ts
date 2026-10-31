@@ -31,6 +31,7 @@ export default defineConfig({
             { text: '快速开始', link: '/guide/quick-start' },
             { text: '值解析规则', link: '/guide/value-resolution' },
             { text: '主题定制', link: '/guide/theming' },
+            { text: 'Nuxt 3 与 SSR', link: '/guide/ssr' },
             { text: '与参考项目的差异', link: '/guide/comparison' }
           ]
         }
