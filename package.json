@@ -1,6 +1,6 @@
 {
   "name": "ep-field-view",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Element Plus 表单文本态组件：编辑页与详情页无缝切换，自动解析选项标签与日期格式，支持主题定制。",
   "keywords": [
     "element-plus",

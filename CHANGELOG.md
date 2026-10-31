@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.1] - 2026-10-31
+
+### Fixed
+
+- `el-form`'s `text` extension attribute is now declared for template type
+  checking through Vue's `ComponentCustomProps`. `<el-form :text>` and
+  `<el-form text>` get completion and checking, while the runtime keeps using
+  the fallthrough attribute.
+
 ## [0.5.0] - 2026-10-31
 
 ### Added
