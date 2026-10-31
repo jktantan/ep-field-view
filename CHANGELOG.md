@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-10-31
+
+### Added
+
+- `TextFormItem`'s `prop` now also accepts an array of path segments
+  (`['user', 'addresses', '0', 'city']`), matching `ElFormItem`. Formatter
+  contexts receive the dotted string form.
+
+### Fixed
+
+- `TextFormItem` now declares the forwarded `ElFormItem` props (`label`,
+  `labelWidth`, `labelPosition`, `required`, `rules`, `error`,
+  `validateStatus`, `for`, `inlineMessage`, `showMessage`, `size`) in its
+  public type and forwards them explicitly. Projects using Nuxt with
+  `strictTemplates` no longer get unknown-prop errors for `<TextFormItem label="…">`.
+- Nuxt module registers the components through `addComponent()`, so Nuxt
+  generates `components.d.ts` and template type checking recognizes
+  `<TextFormItem>` / `<JsonPreview>`. The module also injects the
+  `epFieldView` config types into `.nuxt`.
+
 ## [0.4.0] - 2026-10-31
 
 ### Added
