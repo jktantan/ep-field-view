@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- `ElSelectV2` grouped options and `value-key` object values now resolve to
+  option labels in text mode.
+- `inputTagMode="tag"` tags share an `.ep-field-view__tags` container with
+  configurable `--ep-field-view-tag-gap` spacing (6px, 4px for `small`).
+- Nuxt 3 / SSR guide with hydration guidance and known limitations.
+- Playwright visual regression for light, dark and compact themes, with
+  committed baselines and a 200-field benchmark page (`playground/stress.html`).
+- Playground accepts `?text=false`, `?theme=...` and `?dark=true` to reproduce
+  a fixed state.
+
+### Changed
+
+- A single `MutationObserver` is shared per form element and disconnects when
+  the last `TextFormItem` unmounts.
+- Test suite expanded to 84 cases; statement coverage 93.41%, branch 86.85%.
+
 ## [0.1.0] - 2026-10-31
 
 ### Added

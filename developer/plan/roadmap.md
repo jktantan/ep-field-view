@@ -8,7 +8,7 @@
 | -------- | ------------------------------------------------------------- |
 | 当前版本 | `0.1.0`（首个公开版本）                                       |
 | 组件 API | `TextFormItem`，参考其能力模型（API 使用 text 命名）          |
-| 测试     | Vitest，44 个用例，覆盖核心值解析、文本切换、校验、主题与插槽 |
+| 测试     | Vitest，84 个用例，覆盖核心值解析、文本切换、校验、主题与插槽 |
 | 文档     | VitePress 中文文档 + 本地搜索                                 |
 | 发布     | npmjs（`ep-field-view`），ESM / UMD / CSS / d.ts              |
 
@@ -33,16 +33,16 @@
 
 ### v0.2.0 · 稳定性与覆盖（预计 2 周）
 
-- [ ] 补齐 `ElSelectV2` 分组、远程搜索、对象值选项的测试
-- [ ] 补充 `ElDatePicker` 的 `dates`、`week`、`monthrange`、`value-format="x"` 测试
-- [ ] 补充 `ElInputTag`、`ElTreeSelect`、`ElSegmented` 的解析回归用例
-- [ ] 共享 `MutationObserver`（同一表单只保留一个观察器），降低长表单开销
-- [ ] 为异步 options 增加 `flush: 'post'` 渲染时机测试
-- [ ] 文档增加 Nuxt 3 / SSR 示例与已知限制
-- [ ] 增加 Playwright 视觉回归（浅色、暗色、compact 主题）
-- [ ] 覆盖率提升到 85% 以上（语句与分支）
+- [x] 补齐 `ElSelectV2` 分组、远程搜索、对象值选项的测试
+- [x] 补充 `ElDatePicker` 的 `dates`、`week`、`monthrange`、`value-format="x"` 测试
+- [x] 补充 `ElInputTag`、`ElTreeSelect`、`ElSegmented` 的解析回归用例
+- [x] 共享 `MutationObserver`（同一表单只保留一个观察器），降低长表单开销
+- [x] 为异步 options 增加 `flush: 'post'` 渲染时机测试
+- [x] 文档增加 Nuxt 3 / SSR 示例与已知限制
+- [x] 增加 Playwright 视觉回归（浅色、暗色、compact 主题）
+- [x] 覆盖率提升到 85% 以上（语句与分支）
 
-**验收标准**：新增用例全部通过；长表单（200 个文本项）切换耗时不超过 100ms；视觉回归通过。
+**验收标准**：新增用例全部通过（84 个 Vitest + 3 个视觉回归）；覆盖率语句 93.41% / 分支 86.85%；长表单（200 个文本项）生产构建实测编辑 → 文本 61.6ms、文本 → 编辑 55.4ms（目标 ≤100ms）。
 
 ### v0.3.0 · 扩展能力（预计 1 个月）
 

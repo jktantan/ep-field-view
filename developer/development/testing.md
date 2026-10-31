@@ -9,7 +9,12 @@ tests/
   setup.ts                  jsdom 补丁：ResizeObserver、matchMedia
   utils.spec.ts             纯函数：getByPath、isEmptyValue、isSameValue、resolveConfig
   TextFormItem.spec.ts  组件行为：文本、值、格式化、富内容、主题、校验
+  visual/                   Playwright 视觉回归与长表单基准
+    playground.spec.ts      浅色 / 暗色 / compact 截图比对
+    long-form.spec.ts       200 项切换性能基准（生产 preview）
+    __screenshots__/        基线截图（随代码提交）
 vitest.config.ts            环境、alias、setup、覆盖率
+playwright.config.ts        视觉回归配置：webServer、视口、快照路径
 ```
 
 ## 测试辅助
@@ -103,13 +108,40 @@ pnpm test:coverage
 
 `pnpm check` 会运行 `pnpm test`。
 
-## 视觉验证
+## 视觉回归
 
-单测不加载 CSS，涉及布局/字体/主题的改动需要：
+基于 Playwright，截图基线位于 `tests/visual/__screenshots__/`，覆盖浅色、暗色与 compact 主题：
 
-1. `pnpm dev`，在 playground 切换文本、尺寸、主题、暗色；
-2. `pnpm docs:build`，确认用户文档构建与示例渲染；
-3. 必要时用浏览器检查 `getComputedStyle`（例如 small 字号 12px、large 14px）。
+```bash
+pnpm exec playwright install chromium-headless-shell   # 首次安装浏览器
+pnpm test:visual                                       # 截图比对（自动复用/启动 dev server）
+pnpm test:visual:update                                # 有意修改 UI 后更新基线
+```
+
+- 基线截图必须随改动提交，否则视觉回归形同虚设；
+- playground 支持 `?text=false`、`?theme=compact`、`?dark=true` 复现固定状态，避免脚本操作 UI 带来的不稳定；
+- 快照使用固定视口（1280×900）、禁用动画并等待字体就绪，像素差异应视为回归。
+
+### 长表单性能基准
+
+验收目标：200 个文本项切换耗时 ≤100ms。必须对生产构建测量，dev server 有额外编译开销：
+
+```bash
+pnpm build:playground
+pnpm preview:playground          # 另一个终端，端口 4173
+PLAYWRIGHT_BASE_URL=http://localhost:4173 pnpm test:visual
+```
+
+Windows PowerShell：
+
+```powershell
+$env:PLAYWRIGHT_BASE_URL = "http://localhost:4173"
+pnpm test:visual
+```
+
+实测（Chromium headless，生产构建）：编辑 → 文本 61.6ms，文本 → 编辑 55.4ms。
+
+`pnpm test:visual` 默认只跑截图；`long-form.spec.ts` 仅在 `PLAYWRIGHT_BASE_URL` 指向 4173 时执行，避免在 dev server 上产生误报。
 
 ## 测试原则
 
