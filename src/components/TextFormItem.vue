@@ -63,7 +63,13 @@ const props = withDefaults(defineProps<TextFormItemProps>(), {
   text: undefined,
   nowrap: undefined,
   skipValidation: undefined,
-  includeAffixes: undefined
+  includeAffixes: undefined,
+  // 中文：Boolean prop 未传时保持 undefined，避免 ElFormItem 收到 false。
+  // English: Keep absent Boolean props undefined so ElFormItem does not
+  // receive false.
+  required: undefined,
+  inlineMessage: undefined,
+  showMessage: undefined
 })
 
 const instance = getCurrentInstance()
@@ -179,12 +185,10 @@ const imageMode = computed(() => setting('imageMode', props.imageMode))
  * English: Match the surrounding form / form-item size so text scales with it.
  */
 const size = computed<'large' | 'default' | 'small'>(() => {
-  // 中文：attrs 非响应式，读取 revision 以刷新单字段 size 覆盖。
-  // English: attrs is not reactive; reading revision refreshes an overridden size.
-  void revision.value
-  const attrSize = attrs.size
-  const raw =
-    typeof attrSize === 'string' && attrSize ? attrSize : (formContext?.size ?? parentFormProp<string>('size'))
+  // 中文：size 已声明为 prop，因此是响应式的；未传时回退到表单上下文。
+  // English: `size` is a declared, reactive prop; fall back to the form
+  // context when absent.
+  const raw = props.size || (formContext?.size ?? parentFormProp<string>('size'))
   if (raw === 'large' || raw === 'small') return raw
   return 'default'
 })
@@ -289,6 +293,18 @@ const hasValueProp = computed(() => {
  */
 const formModel = computed(() => formContext?.model ?? parentFormProp<unknown>('model'))
 
+/**
+ * 中文：`prop` 可能是字符串或路径段数组；数组形式以点号连接后用于
+ * formatter 上下文（`FieldViewFormatterContext.prop` 保持字符串）。
+ *
+ * English: `prop` can be a string or an array of path segments. The array form
+ * is joined with dots for the formatter context
+ * (`FieldViewFormatterContext.prop` stays a string).
+ */
+const propPath = computed(() => (Array.isArray(props.prop) ? props.prop.join('.') : props.prop))
+
+const hasPropPath = computed(() => (Array.isArray(props.prop) ? props.prop.length > 0 : Boolean(props.prop)))
+
 const currentValue = computed(() => {
   const raw = hasValueProp.value ? props.value : getByPath(formModel.value, props.prop)
   if (!isEmptyValue(raw)) return raw
@@ -321,7 +337,7 @@ const displayText = computed(() => {
   const vnode = formVNode.value
   if (props.formatter) {
     const result = props.formatter(value, {
-      prop: props.prop,
+      prop: propPath.value,
       value,
       componentName: getComponentName(vnode),
       options: resolvedOptions.value,
@@ -360,6 +376,27 @@ const ContentRenderer = () => {
 
 const isEmpty = computed(() => isEmptyValue(currentValue.value))
 
+/**
+ * 中文：这些属性已声明为 props，不会再进入 `attrs`，必须显式转发给
+ * 内部 `ElFormItem`。
+ *
+ * English: These are declared props, so they no longer appear in `attrs`;
+ * forward them to the inner `ElFormItem` explicitly.
+ */
+const FORM_ITEM_PROP_KEYS = [
+  'label',
+  'labelWidth',
+  'labelPosition',
+  'required',
+  'rules',
+  'error',
+  'validateStatus',
+  'for',
+  'inlineMessage',
+  'showMessage',
+  'size'
+] as const satisfies readonly (keyof TextFormItemProps)[]
+
 const formItemProps = computed<Record<string, unknown>>(() => {
   const { class: attrClass, style: attrStyle, ...rest } = attrs
   const classNames: unknown[] = ['ep-field-view']
@@ -371,6 +408,13 @@ const formItemProps = computed<Record<string, unknown>>(() => {
 
   const result: Record<string, unknown> = { ...rest, class: classNames }
 
+  // 中文：显式转发已声明为 props 的 ElFormItem 属性。
+  // English: Forward ElFormItem props that are now declared on this component.
+  for (const key of FORM_ITEM_PROP_KEYS) {
+    const value = props[key]
+    if (value !== undefined) result[key] = value
+  }
+
   const styleParts: unknown[] = []
   if (namespaceStyle.value) styleParts.push(namespaceStyle.value)
   if (attrStyle !== undefined) styleParts.push(attrStyle)
@@ -379,7 +423,7 @@ const formItemProps = computed<Record<string, unknown>>(() => {
   else if (styleParts.length > 1) result.style = styleParts
 
   const skip = isText.value && shouldSkipValidation.value
-  if (props.prop && !skip) result.prop = props.prop
+  if (hasPropPath.value && !skip) result.prop = props.prop
   else delete result.prop
 
   if (skip) {
@@ -389,7 +433,7 @@ const formItemProps = computed<Record<string, unknown>>(() => {
     result.required = false
   }
 
-  if (!rest.label && !slots.label && rest.labelWidth === undefined) {
+  if (!result.label && !slots.label && result.labelWidth === undefined) {
     result.labelWidth = 'auto'
   }
 

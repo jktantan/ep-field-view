@@ -7,14 +7,15 @@
 
 ## 取值路径
 
-`prop` 支持点号、数组索引与数字下标：
+`prop` 支持点号、数组索引与数字下标，也可以传路径段数组：
 
 ```vue
 <TextFormItem label="城市" prop="user.addresses[0].city"> ... </TextFormItem>
 <TextFormItem label="城市" prop="user.addresses.0.city"> ... </TextFormItem>
+<TextFormItem label="城市" :prop="['user', 'addresses', '0', 'city']"> ... </TextFormItem>
 ```
 
-两者等价。路径不存在时按空值处理。
+三种写法等价。数组形式适合用变量拼接路径，例如 `:prop="['items', index, 'name']"`；`formatter` 收到的 `context.prop` 会统一为点号连接的字符串。路径不存在时按空值处理。
 
 ## 空值判定
 

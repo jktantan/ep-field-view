@@ -12,6 +12,7 @@ import {
   ElDatePicker,
   ElDatePickerPanel,
   ElForm,
+  ElFormItem,
   ElImage,
   ElInput,
   ElInputNumber,
@@ -773,6 +774,21 @@ describe('value formatters', () => {
     await nextTick()
     expect(content(empty.wrapper)).toBe('-')
   })
+
+  it('accepts an array prop and exposes its dotted path to formatters', async () => {
+    let receivedProp: string | undefined
+    const formatter: FieldViewFormatter = (value, context) => {
+      receivedProp = context.prop
+      return String(value)
+    }
+    const { wrapper } = mountItem({
+      model: { user: { addresses: [{ city: '上海' }] } },
+      itemProps: { prop: ['user', 'addresses', '0', 'city'], formatter }
+    })
+    await nextTick()
+    expect(content(wrapper)).toBe('上海')
+    expect(receivedProp).toBe('user.addresses.0.city')
+  })
 })
 
 describe('component display extensions', () => {
@@ -1446,6 +1462,115 @@ describe('edge cases', () => {
     expect(item.exists()).toBe(true)
     expect(item.attributes('style')).toContain('margin-bottom: 0')
     wrapper.unmount()
+  })
+})
+
+describe('form item props', () => {
+  it('forwards declared el-form-item props explicitly', async () => {
+    const rules = [{ required: true, message: '请输入姓名' }]
+    const { wrapper } = mountItem({
+      text: false,
+      model: { name: 'Vue' },
+      itemProps: {
+        prop: 'name',
+        label: '姓名',
+        labelWidth: 120,
+        labelPosition: 'top',
+        required: true,
+        rules,
+        error: '出错了',
+        validateStatus: 'error',
+        for: 'name-input',
+        inlineMessage: true,
+        showMessage: true,
+        size: 'small'
+      } as Record<string, unknown>,
+      slot: (model) => h(ElInput, { modelValue: model.name })
+    })
+    await nextTick()
+    const item = wrapper.findComponent(ElFormItem)
+    expect(item.props('label')).toBe('姓名')
+    expect(item.props('labelWidth')).toBe(120)
+    expect(item.props('labelPosition')).toBe('top')
+    expect(item.props('required')).toBe(true)
+    expect(item.props('rules')).toEqual(rules)
+    expect(item.props('error')).toBe('出错了')
+    expect(item.props('validateStatus')).toBe('error')
+    expect(item.props('for')).toBe('name-input')
+    expect(item.props('inlineMessage')).toBe(true)
+    expect(item.props('showMessage')).toBe(true)
+    expect(item.props('size')).toBe('small')
+    expect(wrapper.find('.ep-field-view--size-small').exists()).toBe(true)
+    wrapper.unmount()
+  })
+
+  it('forwards an array prop to the inner ElFormItem unchanged', async () => {
+    const { wrapper } = mountItem({
+      text: false,
+      model: { items: [{ name: 'A' }] },
+      itemProps: { prop: ['items', '0', 'name'] },
+      slot: (model) => h(ElInput, { modelValue: model.items[0].name })
+    })
+    await nextTick()
+    expect(wrapper.findComponent(ElFormItem).props('prop')).toEqual(['items', '0', 'name'])
+    wrapper.unmount()
+  })
+
+  it('keeps absent boolean props undefined', async () => {
+    const { wrapper } = mountItem({
+      text: false,
+      model: { name: 'Vue' },
+      itemProps: { prop: 'name' },
+      slot: (model) => h(ElInput, { modelValue: model.name })
+    })
+    await nextTick()
+    const item = wrapper.findComponent(ElFormItem)
+    expect(item.props('required')).toBeUndefined()
+    expect(item.props('inlineMessage')).toBeUndefined()
+    expect(item.props('showMessage')).toBe(true)
+    wrapper.unmount()
+  })
+
+  it('forwards label but skips rules in text mode', async () => {
+    const { wrapper } = mountItem({
+      text: true,
+      model: { name: 'Vue' },
+      itemProps: {
+        prop: 'name',
+        label: '姓名',
+        required: true,
+        rules: [{ required: true, message: '请输入姓名' }]
+      },
+      slot: (model) => h(ElInput, { modelValue: model.name })
+    })
+    await nextTick()
+    const item = wrapper.findComponent(ElFormItem)
+    expect(item.props('label')).toBe('姓名')
+    expect(item.props('required')).toBe(false)
+    expect(item.props('rules')).toEqual([])
+    wrapper.unmount()
+  })
+
+  it('only defaults label-width to auto when no label is supplied', async () => {
+    const withoutLabel = mountItem({
+      text: false,
+      model: { name: 'Vue' },
+      itemProps: { prop: 'name' },
+      slot: (model) => h(ElInput, { modelValue: model.name })
+    })
+    await nextTick()
+    expect(withoutLabel.wrapper.findComponent(ElFormItem).props('labelWidth')).toBe('auto')
+    withoutLabel.wrapper.unmount()
+
+    const withLabel = mountItem({
+      text: false,
+      model: { name: 'Vue' },
+      itemProps: { prop: 'name', label: '姓名' },
+      slot: (model) => h(ElInput, { modelValue: model.name })
+    })
+    await nextTick()
+    expect(withLabel.wrapper.findComponent(ElFormItem).props('labelWidth')).toBeUndefined()
+    withLabel.wrapper.unmount()
   })
 })
 

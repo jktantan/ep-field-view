@@ -1,3 +1,4 @@
+import type { ComponentSize, FormItemProp, FormItemProps } from 'element-plus'
 import type { InjectionKey, StyleValue } from 'vue'
 
 /**
@@ -29,6 +30,12 @@ export interface FieldViewOptionProps {
  * English: Context handed to a custom `formatter`.
  */
 export interface FieldViewFormatterContext {
+  /**
+   * 中文：字段路径。`TextFormItem` 的 `prop` 为数组时，各段以点号连接。
+   *
+   * English: Field path. When `TextFormItem`'s `prop` is an array, segments
+   * are joined with dots.
+   */
   prop?: string
   value: unknown
   componentName?: string
@@ -190,21 +197,32 @@ export type EpFieldViewOptions = Partial<EpFieldViewConfig>
  * 中文：`<TextFormItem>` 的 props。
  *
  * Element Plus 原生有 `disabled` 与 `readonly`；本组件的 `text` 是第三种独立状态。
- * 其他 `el-form-item` 属性与插槽（`label`、`error` 等）会原样透传。
+ * `ElFormItem` 的属性（`label`、`rules`、`error` 等）通过继承纳入类型，
+ * 并在运行时原样转发；插槽同样透传。
  *
  * English: Props of `<TextFormItem>`.
  *
  * Element Plus has native `disabled` and `readonly`; this component's `text`
- * mode is a third, independent state. Other `el-form-item` props and slots are
- * forwarded unchanged.
+ * mode is a third, independent state. `ElFormItem` props (`label`, `rules`,
+ * `error`, ...) are included through inheritance and forwarded unchanged at
+ * runtime; slots are forwarded as well.
  */
-export interface TextFormItemProps {
+export interface TextFormItemProps extends Partial<Omit<FormItemProps, 'prop' | 'size'>> {
   /**
-   * 中文：父级表单 model 中的字段路径。
+   * 中文：父级表单 model 中的字段路径。支持字符串（`a.b[0].c` /
+   * `a.b.0.c`）或路径段数组（`['a', 'b', '0', 'c']`），两种写法等价。
    *
-   * English: Field path in the parent form model.
+   * English: Field path in the parent form model. Accepts a string
+   * (`a.b[0].c` / `a.b.0.c`) or an array of path segments
+   * (`['a', 'b', '0', 'c']`); both forms are equivalent.
    */
-  prop?: string
+  prop?: FormItemProp
+  /**
+   * 中文：表单控件尺寸，覆盖父级表单 / 表单项的尺寸。
+   *
+   * English: Form control size, overriding the parent form / form item size.
+   */
+  size?: ComponentSize
   /**
    * 中文：显式值，优先于 model 中的值。
    *

@@ -20,30 +20,50 @@ Element Plus 表单字段有三种相互独立的状态：
 
 ## Props
 
-| 参数             | 说明                                                           | 类型                                            | 默认值                                                                           |
-| ---------------- | -------------------------------------------------------------- | ----------------------------------------------- | -------------------------------------------------------------------------------- |
-| `prop`           | 表单字段路径，支持 `a.b[0].c` 与 `a.b.0.c`                     | `string`                                        | —                                                                                |
-| `value`          | 显式显示值，优先于从 model 读取                                | `unknown`                                       | —                                                                                |
-| `text`           | 文本模式；不传时继承 `el-form` 的 `text` 属性，否则为编辑态    | `boolean`                                       | —                                                                                |
-| `emptyText`      | 空值文案                                                       | `string`                                        | `-`                                                                              |
-| `separator`      | 多值分隔符                                                     | `string`                                        | `;`                                                                              |
-| `rangeSeparator` | 范围值分隔符                                                   | `string`                                        | `~`                                                                              |
-| `dateFormat`     | 日期格式，覆盖组件 `format` 与内置格式                         | `string`                                        | `''`                                                                             |
-| `timeFormat`     | 时间格式，覆盖组件 `format` 与内置格式                         | `string`                                        | `''`                                                                             |
-| `formatter`      | 自定义文本格式化函数                                           | `FieldViewFormatter`                            | —                                                                                |
-| `options`        | 显式选项，绕过插槽解析                                         | `FieldViewOption[]`                             | —                                                                                |
-| `optionProps`    | 选项字段映射                                                   | `FieldViewOptionProps`                          | `{ label: 'label', value: 'value', children: 'children', disabled: 'disabled' }` |
-| `includeAffixes` | 拼接输入框 `prefix` / `prepend` / `append` / `suffix` 插槽文本 | `boolean`                                       | `true`                                                                           |
-| `nowrap`         | 单行省略；表格内默认开启                                       | `boolean`                                       | 表格内 `true`                                                                    |
-| `skipValidation` | 文本模式跳过校验                                               | `boolean`                                       | `true`                                                                           |
-| `rateMode`       | `el-rate` 的显示方式：`text` 分数 / `rate` 评分样式            | `'text' \| 'rate'`                              | `text`                                                                           |
-| `inputTagMode`   | `el-input-tag` 的显示方式：`text` 文本 / `tag` 只读标签        | `'text' \| 'tag'`                               | `text`                                                                           |
-| `imageMode`      | `el-image` 的显示方式：`text` 地址 / `image` 图片预览          | `'text' \| 'image'`                             | `text`                                                                           |
-| `theme`          | 主题名，添加 `ep-field-view--theme-{name}` 类                  | `string`                                        | `''`                                                                             |
-| `contentClass`   | 文本内容元素的额外类名                                         | `string \| string[] \| Record<string, boolean>` | —                                                                                |
-| `contentStyle`   | 文本内容元素的内联样式                                         | `StyleValue`                                    | —                                                                                |
+| 参数             | 说明                                                              | 类型                                            | 默认值                                                                           |
+| ---------------- | ----------------------------------------------------------------- | ----------------------------------------------- | -------------------------------------------------------------------------------- |
+| `prop`           | 表单字段路径；字符串支持 `a.b[0].c` / `a.b.0.c`，也可传路径段数组 | `string \| string[]`                            | —                                                                                |
+| `value`          | 显式显示值，优先于从 model 读取                                   | `unknown`                                       | —                                                                                |
+| `text`           | 文本模式；不传时继承 `el-form` 的 `text` 属性，否则为编辑态       | `boolean`                                       | —                                                                                |
+| `emptyText`      | 空值文案                                                          | `string`                                        | `-`                                                                              |
+| `separator`      | 多值分隔符                                                        | `string`                                        | `;`                                                                              |
+| `rangeSeparator` | 范围值分隔符                                                      | `string`                                        | `~`                                                                              |
+| `dateFormat`     | 日期格式，覆盖组件 `format` 与内置格式                            | `string`                                        | `''`                                                                             |
+| `timeFormat`     | 时间格式，覆盖组件 `format` 与内置格式                            | `string`                                        | `''`                                                                             |
+| `formatter`      | 自定义文本格式化函数                                              | `FieldViewFormatter`                            | —                                                                                |
+| `options`        | 显式选项，绕过插槽解析                                            | `FieldViewOption[]`                             | —                                                                                |
+| `optionProps`    | 选项字段映射                                                      | `FieldViewOptionProps`                          | `{ label: 'label', value: 'value', children: 'children', disabled: 'disabled' }` |
+| `includeAffixes` | 拼接输入框 `prefix` / `prepend` / `append` / `suffix` 插槽文本    | `boolean`                                       | `true`                                                                           |
+| `nowrap`         | 单行省略；表格内默认开启                                          | `boolean`                                       | 表格内 `true`                                                                    |
+| `skipValidation` | 文本模式跳过校验                                                  | `boolean`                                       | `true`                                                                           |
+| `rateMode`       | `el-rate` 的显示方式：`text` 分数 / `rate` 评分样式               | `'text' \| 'rate'`                              | `text`                                                                           |
+| `inputTagMode`   | `el-input-tag` 的显示方式：`text` 文本 / `tag` 只读标签           | `'text' \| 'tag'`                               | `text`                                                                           |
+| `imageMode`      | `el-image` 的显示方式：`text` 地址 / `image` 图片预览             | `'text' \| 'image'`                             | `text`                                                                           |
+| `theme`          | 主题名，添加 `ep-field-view--theme-{name}` 类                     | `string`                                        | `''`                                                                             |
+| `contentClass`   | 文本内容元素的额外类名                                            | `string \| string[] \| Record<string, boolean>` | —                                                                                |
+| `contentStyle`   | 文本内容元素的内联样式                                            | `StyleValue`                                    | —                                                                                |
 
 > 未传 `text`、`nowrap`、`skipValidation`、`rateMode`、`inputTagMode`、`imageMode` 时使用 `undefined`，以便继承表单或全局配置；显式 `false` 会覆盖继承值。
+
+### ElFormItem 属性
+
+`TextFormItemProps` 继承 `Partial<Omit<FormItemProps, 'prop' | 'size'>>`，以下 `ElFormItem` 属性可直接使用，并会转发给内部 `ElFormItem`：
+
+| 参数             | 类型                                         | 说明                                                       |
+| ---------------- | -------------------------------------------- | ---------------------------------------------------------- |
+| `label`          | `string`                                     | 标签文本                                                   |
+| `labelWidth`     | `string \| number`                           | 标签宽度；未传 `label` 且没有 `label` 插槽时默认 `auto`    |
+| `labelPosition`  | `'left' \| 'right' \| 'top' \| ''`           | 标签位置                                                   |
+| `required`       | `boolean`                                    | 是否必填；文本模式且开启 `skipValidation` 时强制为 `false` |
+| `rules`          | `FormItemRule \| FormItemRule[]`             | 校验规则；文本模式且开启 `skipValidation` 时置为空数组     |
+| `error`          | `string`                                     | 错误信息                                                   |
+| `validateStatus` | `'' \| 'error' \| 'validating' \| 'success'` | 校验状态                                                   |
+| `for`            | `string`                                     | 内部原生 `label` 的 `for`                                  |
+| `inlineMessage`  | `boolean`                                    | 行内错误信息                                               |
+| `showMessage`    | `boolean`                                    | 是否显示错误信息                                           |
+| `size`           | `'' \| 'default' \| 'small' \| 'large'`      | 控件尺寸，覆盖父级表单尺寸                                 |
+
+`prop` 的数组形式（如 `['user', 'addresses', '0', 'city']`）与字符串 `user.addresses.0.city` 等价，会原样转发给内部 `ElFormItem` 用于校验字段注册。`formatter` 上下文中的 `context.prop` 始终是点号连接后的字符串。
 
 ### FieldViewFormatter
 

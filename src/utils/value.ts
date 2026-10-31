@@ -1,19 +1,25 @@
 /**
- * 中文：按点号 / 方括号路径读取嵌套值。
+ * 中文：按点号 / 方括号路径或路径段数组读取嵌套值。
  *
- * `getByPath(model, 'user.address[0].city')` 与
- * `getByPath(model, 'user.address.0.city')` 等价。
+ * `getByPath(model, 'user.address[0].city')`、
+ * `getByPath(model, 'user.address.0.city')` 与
+ * `getByPath(model, ['user', 'address', '0', 'city'])` 等价。
  *
- * English: Read a nested value from an object using a dot/bracket path.
+ * English: Read a nested value from an object using a dot/bracket path or an
+ * array of path segments.
  *
- * The two calls above are equivalent.
+ * The three calls above are equivalent.
  */
-export function getByPath(source: unknown, path?: string): unknown {
-  if (!path) return source
-  const segments = path
-    .replace(/\[(\d+)\]/g, '.$1')
-    .split('.')
-    .filter((segment) => segment !== '')
+export function getByPath(source: unknown, path?: string | readonly string[]): unknown {
+  if (path === undefined || path === null || path === '') return source
+  const segments =
+    typeof path === 'string'
+      ? path
+          .replace(/\[(\d+)\]/g, '.$1')
+          .split('.')
+          .filter((segment) => segment !== '')
+      : path
+  if (segments.length === 0) return source
   let current: unknown = source
   for (const segment of segments) {
     if (current === null || current === undefined) return undefined

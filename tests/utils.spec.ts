@@ -47,6 +47,11 @@ describe('getByPath', () => {
     expect(getByPath(source, 'user.addresses.0.city')).toBe('Shanghai')
   })
 
+  it('supports an array of path segments', () => {
+    expect(getByPath(source, ['user', 'addresses', '0', 'city'])).toBe('Shanghai')
+    expect(getByPath(source, [])).toBe(source)
+  })
+
   it('returns undefined for missing paths and the source for an empty path', () => {
     expect(getByPath(source, 'user.missing.value')).toBeUndefined()
     expect(getByPath(source)).toBe(source)
