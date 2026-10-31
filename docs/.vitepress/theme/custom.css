@@ -1,0 +1,35 @@
+.vp-doc .el-form {
+  max-width: 760px;
+}
+
+.vp-doc .el-form-item {
+  margin-bottom: 12px;
+}
+
+.vp-doc .el-form-item__label {
+  font-weight: 500;
+}
+
+.vp-doc .demo-card {
+  padding: 20px;
+  margin: 16px 0;
+  background: var(--vp-c-bg-soft);
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 10px;
+}
+
+.vp-doc .demo-note {
+  margin-top: 8px;
+  color: var(--vp-c-text-2);
+  font-size: 13px;
+}
+
+.vp-doc .theme-demo {
+  --ep-field-view-color: var(--vp-c-brand-1);
+  --ep-field-view-font-weight: 600;
+  --ep-field-view-empty-color: var(--vp-c-text-3);
+}
+
+.vp-doc code {
+  white-space: pre-wrap;
+}

@@ -1,0 +1,10 @@
+allowBuilds:
+  esbuild: true
+
+# These packages are auto-installed peers of vite-plugin-dts and were published
+# within pnpm's minimum release age window. They are only used to bundle type
+# declarations (`rollupTypes`), which this project does not enable.
+minimumReleaseAgeExclude:
+  - '@microsoft/api-extractor'
+  - '@microsoft/api-extractor-model'
+  - '@rushstack/*'

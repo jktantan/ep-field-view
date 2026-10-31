@@ -1,0 +1,141 @@
+# 架构设计
+
+本文说明 `ep-field-view` 的模块划分、运行时数据流和关键设计取舍。更新实现时请同步维护本文件。
+
+## 目标与边界
+
+**目标**
+
+- 用一个组件替代编辑态与详情态两套模板。
+- 只读值从 `el-form` 的 model 与插槽中的 Element Plus 组件推导，无需重复声明展示字段。
+- 保留 Element Plus 的视觉与交互规范，包括尺寸、主题变量与暗色模式。
+- 只读态不参与校验，切回编辑态后校验行为恢复。
+
+**不做**
+
+- 不接管表单渲染、校验规则或数据请求。
+- 不解析任意自定义组件的内部实现；自定义组件通过 `formatter`、`readonly` 插槽或显式 `options` 接入。
+- 不轮询、不修改宿主的 VNode props。
+
+## 模块职责
+
+| 模块                     | 职责                                                 | 关键约束                       |
+| ------------------------ | ---------------------------------------------------- | ------------------------------ |
+| `ReadonlyFormItem.vue`   | 只读状态、字段注册、插槽转发、内容渲染、主题与尺寸类 | 不直接读写 DOM（只读状态除外） |
+| `utils/value.ts`         | `prop` 路径读取、空值判定、值比较、文本化            | 不依赖 Vue                     |
+| `utils/vnode.ts`         | slot/VNode 遍历、文本提取、命名/默认插槽内容         | 只读遍历，不挂载子组件         |
+| `utils/format.ts`        | 组件名分支、选项/日期/范围格式化、富内容解析         | 纯函数，输入 VNode + 配置      |
+| `utils/form-readonly.ts` | 观察 `el-form` 的 `readonly` 属性                    | 仅客户端运行                   |
+| `config.ts`              | 全局配置、`app.use`、`provide/inject`                | 配置对象响应式                 |
+| `styles/index.css`       | CSS 变量、尺寸、内置主题、表格截断                   | 只使用 Element Plus 语义变量   |
+
+## 数据流
+
+```
+el-form (readonly attr, model, size)
+        │
+        ├── formContextKey ──► model / size / rules
+        ├── attrs.readonly ──► MutationObserver ──► formReadonly(ref)
+        │
+ReadonlyFormItem
+  readonly = props.readonly ?? formReadonly ?? false
+  value    = props.value（显式） ?? getByPath(model, props.prop)
+  vnode    = findComponentVNode(slots.default(), CAPTURED_COMPONENTS)
+  text     = formatter?.(value) ?? formatFieldValue(value, vnode, config)
+  rich     = resolveCustomDisplay(value, vnode, config)
+        │
+        ├── 只读：rich ? render VNode : text
+        └── 编辑：<slot />
+```
+
+### 只读状态优先级
+
+1. `ReadonlyFormItem` 的 `readonly` prop；
+2. 父级 `el-form` 的 `readonly` 属性（fallthrough attr，`MutationObserver` 同步）；
+3. `false`。
+
+### 值优先级
+
+1. 显式 `value`（即使为 `undefined` 也视为显式提供）；
+2. `el-form` 的 `model` 按 `prop` 路径读取（支持 `a.b[0].c` 与 `a.b.0.c`）；
+3. 空值 → `emptyText`。
+
+### 渲染优先级
+
+1. 用户提供的 `readonly` 插槽；
+2. 组件自身的富内容（`el-select` 的 `#label`、`el-radio` / `el-checkbox` 选中项默认插槽中的元素）；
+3. `formatter` 文本；
+4. 内置格式化文本；
+5. `emptyText`。
+
+`formatter` 存在时不会渲染富内容（显式文本优先）。需要富内容时使用 `readonly` 插槽。
+
+## 关键设计决策
+
+### 1. 用 MutationObserver 同步 `el-form readonly`
+
+Element Plus 的 `ElForm` 没有声明 `readonly` prop，它作为 fallthrough attribute 存在。Vue 实例的 `attrs` 是普通对象，不是响应式的，`computed` 读取它不会在属性变化时失效。
+
+因此：
+
+- 初始值从 `attrs.readonly` 读取；
+- 挂载后用 `MutationObserver` 观察表单根元素的 `readonly` 属性；
+- 属性变化时更新一个 `ref`，驱动组件重新渲染。
+
+代价是每个只读项一个 observer；属性变化频率极低，开销可接受。SSR 不执行 observer，首屏使用初始 attrs。
+
+### 2. 只读时移除 `prop`，并用 `key` 重建 `ElFormItem`
+
+只读字段不应参与校验，也不应显示必填星号。Element Plus 的 `ElFormItem` 会合并表单级 rules，单纯传 `rules: []` 无法阻止 form rules 匹配。
+
+方案：
+
+- 只读时不传 `prop`，`ElFormItem` 不注册字段；
+- 通过 `:key="isReadonly ? 'readonly' : 'edit'"` 在状态切换时重建 `ElFormItem`，确保编辑态 `onMounted` 重新注册字段与规则；
+- 代价是切换瞬间的校验状态（错误提示）被清除，表单数据不受影响。
+
+### 3. 富内容直接渲染组件选中值插槽的 VNode
+
+`el-select` 的选中值由 `#label` 插槽或 `label` 决定；`el-option` 的 `#label` 只影响下拉列表。只读态要“与组件最终显示一致”，因此：
+
+- 渲染 `el-select` 的 `#label` 插槽 VNode；
+- **忽略** `el-option` 的 `#label`，只使用其 `label` 文本；
+- 渲染 `el-radio` / `el-checkbox` 选中项默认插槽中的元素；
+- 纯文本仍走字符串格式化，避免模板空白节点影响分隔符与文本。
+
+### 4. 文本与 VNode 分离
+
+- `displayText` 始终是字符串，用于 `readonly` 插槽作用域、`formatter` 与纯文本渲染；
+- `resolveCustomDisplay` 返回 VNodeChild，仅在只读态且存在富内容时使用；
+- VNode 在每次组件更新时重新求值（依赖 revision），避免复用已挂载的 VNode。
+
+### 5. 尺寸与字体遵循 Element Plus
+
+- 只读文本字号：`small` 12px，`default` / `large` 14px；
+- 最小行高：24 / 32 / 40px；
+- 尺寸通过 `ep-field-view--size-{large|small}` 类与 CSS 变量实现；
+- 内置主题（`compact` 等）可覆盖字号，主题规则位于尺寸规则之后。
+
+### 6. 不引入额外运行时依赖
+
+除 `dayjs`（与 Element Plus 共用日期格式化）外无运行时依赖。不使用 `default-passive-events` 等全局补丁。
+
+## 构建与产物
+
+- Vite 库模式，入口 `src/index.ts`；
+- 外部化 `vue`、`element-plus`、`dayjs`；
+- 产物：`dist/index.mjs`、`dist/index.umd.cjs`、`dist/style.css`、`dist/*.d.ts`；
+- 样式集中输出，宿主需显式引入 `ep-field-view/style.css`；
+- `vite-plugin-dts` 生成类型，`files` 仅包含 `dist`、README、LICENSE、NOTICE。
+
+## 已知限制
+
+- 插槽 VNode 解析依赖 Element Plus 组件的 `name`，升级 EP 大版本需回归。
+- 异步选项依赖父组件重渲染后刷新，不轮询。
+- 只读切换会重建 `ElFormItem`。
+- `el-option` 的富内容不会进入只读选中值（与 EP 行为一致），需要时用 `el-select` 的 `#label` 或 `readonly` 插槽。
+- SSR 首屏无法响应 `readonly` 的运行时变化。
+
+## 参考与归属
+
+组件思路参考 [element-plus-readonly-form-item](https://github.com/fuchengwei/element-plus-readonly-form-item)（MIT）。本项目在其基础上重写并修复了轮询、空值、动态切换与校验问题，完整第三方许可见根目录 [NOTICE](../../NOTICE)。

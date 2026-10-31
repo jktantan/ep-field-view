@@ -1,0 +1,9 @@
+node_modules
+dist
+dist-playground
+coverage
+pnpm-lock.yaml
+docs/.vitepress/cache
+docs/.vitepress/dist
+*.tsbuildinfo
+.reasonix

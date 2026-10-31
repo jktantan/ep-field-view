@@ -1,0 +1,80 @@
+.ep-field-view {
+  --ep-field-view-color: var(--el-text-color-regular);
+  --ep-field-view-empty-color: var(--el-text-color-placeholder);
+  --ep-field-view-font-size: var(--el-font-size-base);
+  --ep-field-view-font-weight: 400;
+  --ep-field-view-line-height: 1.6;
+  --ep-field-view-word-break: break-all;
+  --ep-field-view-content-width: 100%;
+  --ep-field-view-min-height: var(--el-component-size);
+}
+
+.ep-field-view .el-form-item__content {
+  min-height: var(--ep-field-view-min-height);
+  align-items: center;
+}
+
+/* Element Plus only shrinks the font for `small`; `default` and `large`
+   both use the base font size. */
+.ep-field-view--size-large {
+  --ep-field-view-min-height: var(--el-component-size-large);
+}
+
+.ep-field-view--size-small {
+  --ep-field-view-font-size: var(--el-font-size-extra-small);
+  --ep-field-view-min-height: var(--el-component-size-small);
+}
+
+.ep-field-view__content {
+  display: inline-block;
+  box-sizing: border-box;
+  width: var(--ep-field-view-content-width);
+  max-width: 100%;
+  color: var(--ep-field-view-color);
+  font-family: inherit;
+  font-size: var(--ep-field-view-font-size);
+  font-weight: var(--ep-field-view-font-weight);
+  line-height: var(--ep-field-view-line-height);
+  overflow-wrap: anywhere;
+  word-break: var(--ep-field-view-word-break);
+  white-space: pre-wrap;
+  vertical-align: middle;
+}
+
+.ep-field-view__content--empty {
+  color: var(--ep-field-view-empty-color);
+}
+
+/* Table cells: keep rows compact and truncate long content. */
+.ep-field-view--nowrap .el-form-item__content {
+  min-height: auto;
+}
+
+.ep-field-view--nowrap .ep-field-view__content {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  word-break: normal;
+  overflow-wrap: normal;
+}
+
+/* Built-in themes. Hosts can add their own via `theme="my-theme"`. */
+.ep-field-view--theme-compact {
+  --ep-field-view-font-size: var(--el-font-size-small);
+  --ep-field-view-line-height: 1.4;
+}
+
+.ep-field-view--theme-compact .el-form-item__label {
+  font-size: var(--el-font-size-small);
+}
+
+.ep-field-view--theme-bold {
+  --ep-field-view-font-weight: 600;
+  --ep-field-view-color: var(--el-text-color-primary);
+}
+
+.ep-field-view--theme-plain {
+  --ep-field-view-color: var(--el-text-color-secondary);
+  --ep-field-view-empty-color: var(--el-text-color-disabled);
+}
