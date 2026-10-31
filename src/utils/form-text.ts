@@ -22,14 +22,52 @@ export function readFormText(attrs: Record<string, unknown> | undefined | null):
 }
 
 /**
+ * 中文：一个表单元素上的共享观察器及其订阅者。
+ *
+ * English: The shared observer for one form element and its subscribers.
+ */
+interface FormTextObservation {
+  observer: MutationObserver
+  listeners: Set<() => void>
+}
+
+/**
+ * 中文：按表单元素缓存观察器。长表单通常有大量 `TextFormItem`，每个字段
+ * 单独创建 `MutationObserver` 会成倍增加观察开销；同一表单只保留一个观察器，
+ * 属性变化时统一通知所有字段。最后一个订阅者离开时断开观察器。
+ *
+ * English: Cache observers per form element. A long form usually contains many
+ * `TextFormItem` fields, and one `MutationObserver` per field multiplies the
+ * observation cost. Keep a single observer per form and notify every field on
+ * change. Disconnect it when the last subscriber leaves.
+ */
+const observations = new WeakMap<Element, FormTextObservation>()
+
+/**
  * 中文：观察元素上的 `text` 属性，返回清理函数；非 DOM 环境下安全返回。
+ * 清理函数可重复调用。
  *
  * English: Observe the `text` attribute on an element. Returns a cleanup
- * function. Safe to call in non-DOM environments.
+ * function. Safe to call in non-DOM environments and safe to call twice.
  */
 export function observeFormText(element: Element | null | undefined, onChange: () => void): () => void {
   if (!element || typeof MutationObserver === 'undefined') return () => {}
-  const observer = new MutationObserver(() => onChange())
-  observer.observe(element, { attributes: true, attributeFilter: ['text'] })
-  return () => observer.disconnect()
+  let observation = observations.get(element)
+  if (!observation) {
+    const listeners = new Set<() => void>()
+    const observer = new MutationObserver(() => {
+      for (const listener of listeners) listener()
+    })
+    observer.observe(element, { attributes: true, attributeFilter: ['text'] })
+    observation = { observer, listeners }
+    observations.set(element, observation)
+  }
+  const listeners = observation.listeners
+  listeners.add(onChange)
+  return () => {
+    if (!listeners.delete(onChange)) return
+    if (listeners.size > 0) return
+    observation.observer.disconnect()
+    if (observations.get(element) === observation) observations.delete(element)
+  }
 }
