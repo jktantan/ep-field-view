@@ -64,6 +64,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
+    "test:visual": "playwright test",
+    "test:visual:update": "playwright test --update-snapshots",
     "lint": "pnpm run lint:eslint && pnpm run lint:stylelint",
     "lint:eslint": "eslint .",
     "lint:stylelint": "stylelint \"src/**/*.{vue,css}\" \"playground/**/*.{vue,css}\" \"docs/**/*.{vue,css}\"",
@@ -74,6 +76,8 @@
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs",
+    "build:playground": "vite build --config playground/vite.config.ts",
+    "preview:playground": "vite preview --config playground/vite.config.ts --port 4173",
     "prepublishOnly": "pnpm run check && pnpm run build && pnpm run docs:build"
   },
   "peerDependencies": {
@@ -85,6 +89,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.0",
+    "@playwright/test": "^1.64.1",
     "@types/node": "^24.19.2",
     "@vitejs/plugin-vue": "^6.0.10",
     "@vitest/coverage-v8": "^5.0.5",

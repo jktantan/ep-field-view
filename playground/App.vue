@@ -413,9 +413,13 @@ import { ElMessage } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import type { FieldViewFormatter } from 'ep-field-view'
 
-const textMode = ref(true)
-const dark = ref(false)
-const theme = ref('default')
+// 中文：支持 URL 参数（text / theme / dark），视觉回归与分享链接可复现同一状态。
+// English: URL parameters (text / theme / dark) let visual tests and shared
+// links reproduce the same state.
+const query = new URLSearchParams(window.location.search)
+const textMode = ref(query.get('text') !== 'false')
+const dark = ref(query.get('dark') === 'true')
+const theme = ref(query.get('theme') ?? 'default')
 const size = ref<'large' | 'default' | 'small'>('default')
 
 const formRef = ref<FormInstance>()

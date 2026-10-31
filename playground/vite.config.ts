@@ -18,6 +18,12 @@ export default defineConfig({
   },
   build: {
     outDir: resolve(import.meta.dirname, '../dist-playground'),
-    emptyOutDir: true
+    emptyOutDir: true,
+    rollupOptions: {
+      input: {
+        main: resolve(import.meta.dirname, 'index.html'),
+        stress: resolve(import.meta.dirname, 'stress.html')
+      }
+    }
   }
 })
